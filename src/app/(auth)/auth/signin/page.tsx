@@ -13,14 +13,11 @@ export default function SignInPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await signIn("credentials", {
+      await signIn("credentials", {
         email,
         callbackUrl: "/dashboard",
         redirect: true,
       });
-      if (result?.error) {
-        setError(result.error);
-      }
     } catch (err: any) {
       setError(err?.message || "Sign in failed");
     } finally {
