@@ -41,20 +41,24 @@ export function TourPopover({ projectId }: TourPopoverProps) {
     load();
   }, []);
 
-  // Position the tour panel near the target element
+  // Position the tour panel near the target element (centered on mobile)
   const reposition = useCallback(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      setPosition({ top: 80, left: 16 });
+      setAnchorRight(false);
+      return;
+    }
     const step = steps[currentIndex];
     if (!step?.targetSelector) {
-      setPosition({ top: 120, left: 0 });
+      setPosition({ top: 120, left: 16 });
       setAnchorRight(false);
       return;
     }
     const el = document.querySelector(step.targetSelector);
     if (el) {
       const rect = el.getBoundingClientRect();
-      const viewportW = window.innerWidth;
-      // Place panel to the right if there's space, otherwise below
-      if (rect.right + 380 < viewportW) {
+      if (rect.right + 380 < window.innerWidth) {
         setPosition({ top: Math.max(80, rect.top - 10), left: rect.right + 16 });
         setAnchorRight(true);
       } else {
@@ -62,7 +66,7 @@ export function TourPopover({ projectId }: TourPopoverProps) {
         setAnchorRight(false);
       }
     } else {
-      setPosition({ top: 120, left: 0 });
+      setPosition({ top: 120, left: 16 });
       setAnchorRight(false);
     }
   }, [currentIndex, steps]);
@@ -117,9 +121,11 @@ export function TourPopover({ projectId }: TourPopoverProps) {
 
   return (
     <>
-      {/* Overlay highlight around target */}
+      {/* Overlay highlight around target — desktop only */}
       {currentStep.targetSelector && (
-        <TargetHighlight selector={currentStep.targetSelector} />
+        <div className="hidden md:block">
+          <TargetHighlight selector={currentStep.targetSelector} />
+        </div>
       )}
 
       {/* Tour panel — anchored or centered on mobile */}
@@ -127,15 +133,14 @@ export function TourPopover({ projectId }: TourPopoverProps) {
         className="fixed z-[100] transition-all duration-300 ease-out"
         style={{
           top: position.top,
-          ...(anchorRight
-            ? { left: position.left }
-            : { left: Math.max(16, Math.min(position.left, window.innerWidth - 360)) }),
+          left: anchorRight ? position.left : 16,
+          right: anchorRight ? "auto" : 16,
           maxWidth: "min(360px, calc(100vw - 32px))",
         }}
       >
-        <div className="rounded-xl border-2 border-navy-900 bg-white p-5 shadow-xl">
-          {/* Arrow pointing to target */}
-          <div className={`absolute top-4 w-3 h-3 rotate-45 border-l border-t bg-white border-navy-900 ${
+        <div className="rounded-xl border-2 border-navy-900 bg-white p-4 md:p-5 shadow-xl">
+          {/* Arrow pointing to target — hidden on mobile */}
+          <div className={`hidden md:block absolute top-4 w-3 h-3 rotate-45 border-l border-t bg-white border-navy-900 ${
             anchorRight ? "-left-[7px]" : "left-4 -top-[7px]"
           }`} />
 
