@@ -13,13 +13,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Build with OpenNext
-        run: npx opennextjs-cloudflare build
+      - name: Build with next-on-pages
+        run: npx @cloudflare/next-on-pages
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: "0a5d1f864b6e58037f101edbf9580706"
-          command: pages deploy .open-next --project-name=bmi-platform
-        env:
-          CLOUDFLARE_ACCOUNT_ID: "0a5d1f864b6e58037f101edbf9580706"
+          command: pages deploy .vercel/output/static --project-name=bmi-platform
