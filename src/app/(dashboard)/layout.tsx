@@ -11,33 +11,34 @@ export default async function DashboardLayout({
 }) {
   const session = await auth();
 
-  // Middleware handles unauthenticated redirects, but guard here too
   if (!session?.user) {
     redirect("/auth/signin?auto=demo@bmi-platform.com");
   }
 
-  const userId = session.user.id;
-
   // Auto-attach seeded projects if user has none
-  const userProjects = await prisma.projectMember.count({
-    where: { userId },
+  // (safety net for users who weren't auto-attached during sign-in)
+  const membershipCount = await prisma.projectMember.count({
+    where: { userId: session.user.id },
   });
 
-  if (userProjects === 0 && session.user.email) {
-    const firstProjectOwner = await prisma.user.findFirst({
+  if (membershipCount === 0) {
+    const seedOwner = await prisma.user.findFirst({
       where: { email: { not: session.user.email as string } },
       orderBy: { createdAt: "asc" },
     });
-    if (firstProjectOwner) {
-      const adminProjects = await prisma.project.findMany({
-        where: { ownerId: firstProjectOwner.id },
+    if (seedOwner) {
+      const seedProjects = await prisma.project.findMany({
+        where: { ownerId: seedOwner.id },
+        select: { id: true },
       });
-      for (const project of adminProjects) {
-        await prisma.projectMember.upsert({
-          where: { userId_projectId: { userId, projectId: project.id } },
-          update: {},
-          create: { userId, projectId: project.id, role: "member" },
-        });
+      if (seedProjects.length > 0) {
+        for (const p of seedProjects) {
+          await prisma.projectMember.upsert({
+            where: { userId_projectId: { userId: session.user.id, projectId: p.id } },
+            update: {},
+            create: { userId: session.user.id, projectId: p.id, role: "member" },
+          });
+        }
       }
     }
   }
