@@ -20,3 +20,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: pages deploy .open-next --project-name=bmi-platform
+        env:
+          CLOUDFLARE_ACCOUNT_ID: "0a5d1f864b6e58037f101edbf9580706"
