@@ -5,39 +5,11 @@ import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user) redirect("/auth/signin");
-  const userId = session.user.id;
-
-  // Auto-attach seeded projects if user has none
-  const userProjects = await prisma.projectMember.count({
-    where: { userId },
-  });
-
-  if (userProjects === 0) {
-    // Find projects owned by admin and add this user as member
-    const adminUser = await prisma.user.findUnique({
-      where: { email: "admin@test.com" },
-    });
-    if (adminUser) {
-      const adminProjects = await prisma.project.findMany({
-        where: { ownerId: adminUser.id },
-      });
-      for (const project of adminProjects) {
-        const existing = await prisma.projectMember.findUnique({
-          where: { userId_projectId: { userId, projectId: project.id } },
-        });
-        if (!existing) {
-          await prisma.projectMember.create({
-            data: { userId, projectId: project.id, role: "member" },
-          });
-        }
-      }
-    }
-  }
+  if (!session?.user) redirect("/auth/signin?auto=demo@bmi-platform.com");
 
   const projects = await prisma.project.findMany({
     where: {
-      members: { some: { userId } },
+      members: { some: { userId: session.user.id } },
     },
     include: {
       _count: { select: { hypotheses: true, experiments: true } },
