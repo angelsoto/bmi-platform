@@ -230,7 +230,7 @@ model HypothesisVersion {
 
 model HypothesisRiskRank {
   id                      String   @id @default(cuid())
-  hypothesisId            String   @unique
+  hypothesisId            String
   projectId               String
   survivalCriticality     String   @default("medium")
   uncertainty             String   @default("medium")
@@ -436,7 +436,7 @@ model PageAnalyticsConfig {
   trackPageViews  Boolean @default(true)
   trackCtaClicks  Boolean @default(true)
   trackFormSubmits Boolean @default(false)
-  customEvents    String
+  customEvents    String  @default("[]")
 
   landingPage LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
 }
@@ -526,7 +526,7 @@ model ProgressTrack {
   type            String   @default("validation")
   description     String?
   health          String   @default("unknown")
-  completionScore Float    @default(0)
+  completionScore Float?
   currentFocus    String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

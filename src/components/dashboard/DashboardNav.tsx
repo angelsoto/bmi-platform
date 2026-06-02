@@ -56,7 +56,7 @@ export function DashboardNav() {
     fetch("/api/projects")
       .then((res) => res.ok ? res.json() : [])
       .then((data: Project[]) => setProjects(data))
-      .catch(() => {});
+      .catch((err) => console.error("DashboardNav: failed to load projects", err));
   }, []);
 
   const currentProject = projects.find((p) => p.id === currentProjectId);

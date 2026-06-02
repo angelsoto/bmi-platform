@@ -39,7 +39,7 @@ export default async function EvidencePage({
         <div className="space-y-3">
           {evidenceItems.map((item) => {
             const review = item.qualityReviews[0];
-            const biasCount = review?.biasFlags.length ?? 0;
+            const biasCount = review?.biasFlags?.length ?? 0;
 
             return (
               <div key={item.id} className="rounded-lg border bg-white p-4 shadow-widget">

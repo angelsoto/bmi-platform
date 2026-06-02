@@ -111,7 +111,8 @@ export default async function PMFPage({
 
           {/* Blockers */}
           {(() => {
-            const ids: string[] = JSON.parse(latestPmf.blockingHypothesisIds || "[]");
+            let ids: string[] = [];
+            try { ids = JSON.parse(latestPmf.blockingHypothesisIds || "[]"); } catch {}
             if (ids.length === 0) return null;
             return (
               <div className="rule-box rule-box--blocker">
