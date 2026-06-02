@@ -23,7 +23,7 @@ export default async function DashboardLayout({
 
   if (membershipCount === 0) {
     const seedOwner = await prisma.user.findFirst({
-      where: { email: { not: session.user.email as string } },
+      where: { email: { not: session.user.email as string }, projects: { some: {} } },
       orderBy: { createdAt: "asc" },
     });
     if (seedOwner) {

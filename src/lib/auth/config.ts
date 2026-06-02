@@ -25,9 +25,9 @@ export const authConfig: NextAuthConfig = {
             },
           });
 
-          // Auto-attach seeded projects owned by other users
+          // Auto-attach seeded projects owned by the seed user
           const seedOwner = await prisma.user.findFirst({
-            where: { email: { not: email } },
+            where: { email: { not: email }, projects: { some: {} } },
             orderBy: { createdAt: "asc" },
           });
           if (seedOwner) {
