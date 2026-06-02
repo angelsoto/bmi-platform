@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-background: #ffffff;
+  --color-foreground: #171717;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* BMI Primary Navy */
+  --color-navy-950: #072849;
+  --color-navy-900: #0b406d;
+  --color-navy-800: #064c83;
+  --color-navy-700: #01599e;
+  --color-navy-600: #0070c4;
+  --color-navy-500: #0c8ee7;
+
+  /* Blueprint Background */
+  --color-blueprint-50: #f0f7ff;
+  --color-blueprint-100: #e0effe;
+
+  /* Engine / System */
+  --color-engine-bg: #f8fafc;
+  --color-engine-border: #e2e8f0;
+  --color-circuit-line: #94a3b8;
+
+  /* Cyan Accent */
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06b6d4;
+
+  /* Status */
+  --color-status-validated: #16a34a;
+  --color-status-invalidated: #dc2626;
+  --color-status-inconclusive: #ca8a04;
+  --color-status-untested: #6b7280;
+  --color-status-in-progress: #2563eb;
+  --color-status-draft: #9ca3af;
+
+  /* Risk */
+  --color-risk-critical: #7f1d1d;
+  --color-risk-high: #dc2626;
+  --color-risk-medium: #f59e0b;
+  --color-risk-low: #16a34a;
+
+  /* Evidence */
+  --color-evidence-strong: #16a34a;
+  --color-evidence-moderate: #2563eb;
+  --color-evidence-weak: #ca8a04;
+  --color-evidence-none: #6b7280;
+
+  /* Fonts */
+  --font-sans: "Inter", "system-ui", "sans-serif";
+  --font-mono: "JetBrains Mono", "monospace";
+
+  /* Border Radius */
+  --radius-widget: 0.75rem;
+
+  /* Shadows */
+  --shadow-widget: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-engine: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-blueprint-50);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+/* Blueprint Grid Background */
+.bg-blueprint-grid {
+  background-image:
+    linear-gradient(var(--color-circuit-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-circuit-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: center center;
+  opacity: 0.08;
+}
+
+/* Hard Rule Box */
+.rule-box {
+  border: 2px solid var(--color-risk-medium);
+  border-radius: var(--radius-widget);
+  padding: 1rem;
+  background-color: #fffaf0;
+}
+
+.rule-box--blocker {
+  border-color: var(--color-risk-high);
+  background-color: #fef2f2;
+}
+
+/* Engine Panel (Mode B) */
+.engine-panel {
+  background: var(--color-navy-900);
+  color: white;
+  border-radius: var(--radius-widget);
+  padding: 1.5rem;
+}
+
+/* Deferred Feature Treatment */
+.deferred-feature {
+  border: 2px dashed var(--color-status-untested);
+  border-radius: var(--radius-widget);
+  opacity: 0.6;
+}
+
+/* Focus Ring */
+*:focus-visible {
+  outline: 2px solid var(--color-cyan-400);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Gauge animation */
+@keyframes gauge-fill {
+  from { width: 0%; }
+  to { width: var(--gauge-value, 0%); }
+}
+
+.animate-gauge-fill {
+  animation: gauge-fill 0.8s ease-out forwards;
 }

@@ -1,0 +1,601 @@
+// BMI Platform — Complete Prisma Schema (SQLite for development)
+// All enums stored as String; validated at app layer via Zod.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ==================== AUTH (Auth.js) ==============================
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  projects       Project[]            @relation("ProjectOwner")
+  memberships    ProjectMember[]
+  onboarding     UserOnboardingState?
+  mvvStatements  MVVStatement[]
+  conceptIntakes ConceptIntake[]
+  personas       Persona[]
+  offers         Offer[]
+  aiLogs         AILog[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 3: Project Setup =====================
+model Project {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  businessType  String   @default("startup")
+  currentStage  String   @default("idea")
+  primaryGoal   String?
+  proofCaseMode Boolean  @default(false)
+  ownerId       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  owner              User                @relation("ProjectOwner", fields: [ownerId], references: [id])
+  members            ProjectMember[]
+  mvv                MVVStatement?
+  conceptIntakes     ConceptIntake[]
+  assumptions        BusinessAssumption[]
+  personas           Persona[]
+  offers             Offer[]
+  hypotheses         Hypothesis[]
+  evidenceItems      EvidenceItem[]
+  qualityReviews     EvidenceQualityReview[]
+  experiments        Experiment[]
+  experimentSurfaces ExperimentSurface[]
+  landingPages       LandingPage[]
+  analyticsEvents    AnalyticsEvent[]
+  metricSnapshots    MetricSnapshot[]
+  pmfAssessments     PMFReadinessAssessment[]
+  learningLoops      LearningLoop[]
+  progressTracks     ProgressTrack[]
+  aiLogs             AILog[]
+  governanceReviews  GovernanceReview[]
+}
+
+model ProjectMember {
+  id        String @id @default(cuid())
+  userId    String
+  projectId String
+  role      String @default("member")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+}
+
+model MVVStatement {
+  id                 String   @id @default(cuid())
+  projectId          String   @unique
+  mission            String
+  vision             String
+  values             String
+  founderAssumptions String
+  unresolvedTensions String
+  versionNumber      Int      @default(1)
+  createdByUserId    String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdByUserId], references: [id])
+}
+
+// ==================== MODULE 1: Concept Intake ====================
+model ConceptIntake {
+  id            String    @id @default(cuid())
+  projectId     String
+  userId        String
+  rawInput      String
+  inputType     String    @default("typed_text")
+  parsedSummary String?
+  status        String    @default("submitted")
+  createdAt     DateTime  @default(now())
+  processedAt   DateTime?
+
+  project     Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User               @relation(fields: [userId], references: [id])
+  assumptions BusinessAssumption[]
+}
+
+model BusinessAssumption {
+  id              String   @id @default(cuid())
+  projectId       String
+  conceptIntakeId String?
+  statement       String
+  category        String   @default("customer_pain")
+  riskLevel       String   @default("medium")
+  evidenceStatus  String   @default("untested")
+  createdAt       DateTime @default(now())
+
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  conceptIntake ConceptIntake? @relation(fields: [conceptIntakeId], references: [id])
+}
+
+// ==================== MODULE 4: Persona and Offer =================
+model Persona {
+  id                  String   @id @default(cuid())
+  projectId           String
+  name                String
+  description         String?
+  primaryPain         String
+  context             String?
+  relatedHypothesisIds String
+  createdByUserId     String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [createdByUserId], references: [id])
+}
+
+model Offer {
+  id                  String   @id @default(cuid())
+  projectId           String
+  name                String
+  valueProposition    String
+  format              String   @default("service")
+  priceModel          String?
+  priceAmount         Float?
+  relatedHypothesisIds String
+  createdByUserId     String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [createdByUserId], references: [id])
+}
+
+// ==================== MODULE 5: Hypothesis Database ===============
+model Hypothesis {
+  id                    String   @id @default(cuid())
+  projectId             String
+  title                 String
+  statement             String
+  type                  String   @default("desirability")
+  relatedPersonaId      String?
+  relatedOfferId        String?
+  relatedLandingPageId  String?
+  confidence            String   @default("medium")
+  evidenceStrength      String   @default("none")
+  status                String   @default("draft")
+  currentVersionNumber  Int      @default(1)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  project      Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions     HypothesisVersion[]
+  riskRanks    HypothesisRiskRank[]
+  evidence     EvidenceItem[]      @relation("EvidenceForHypothesis")
+  experiments  Experiment[]
+}
+
+model HypothesisVersion {
+  id               String   @id @default(cuid())
+  hypothesisId     String
+  projectId        String
+  versionNumber    Int
+  statement        String
+  confidence       String   @default("medium")
+  evidenceStrength String  @default("none")
+  changedReason    String   @default("")
+  changedByUserId  String
+  createdAt        DateTime @default(now())
+
+  hypothesis Hypothesis @relation(fields: [hypothesisId], references: [id], onDelete: Cascade)
+}
+
+model HypothesisRiskRank {
+  id                      String   @id @default(cuid())
+  hypothesisId            String   @unique
+  projectId               String
+  survivalCriticality     String   @default("medium")
+  uncertainty             String   @default("medium")
+  validationPriorityScore Float?
+  rationale               String
+  createdAt               DateTime @default(now())
+
+  hypothesis Hypothesis @relation(fields: [hypothesisId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 6: Evidence Quality ==================
+model EvidenceItem {
+  id                  String   @id @default(cuid())
+  projectId           String
+  sourceType          String   @default("manual_note")
+  sourceEntityId      String?
+  summary             String
+  rawText             String?
+  relatedHypothesisId String?
+  relatedExperimentId String?
+  evidenceStrength    String   @default("weak")
+  collectedByUserId   String?
+  collectedAt         DateTime?
+  createdAt           DateTime @default(now())
+
+  project        Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  hypothesis     Hypothesis?          @relation("EvidenceForHypothesis", fields: [relatedHypothesisId], references: [id])
+  qualityReviews EvidenceQualityReview[]
+}
+
+model EvidenceQualityReview {
+  id                              String   @id @default(cuid())
+  projectId                       String
+  evidenceItemId                  String?
+  sourceEntityType                String   @default("manual_note")
+  sourceEntityId                  String
+  adjustedEvidenceStrength        String   @default("weak")
+  recommendedDisconfirmationTest  String?
+  createdAt                       DateTime @default(now())
+
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  evidenceItem EvidenceItem? @relation(fields: [evidenceItemId], references: [id])
+  biasFlags    BiasFlag[]
+}
+
+model BiasFlag {
+  id          String   @id @default(cuid())
+  reviewId    String
+  type        String
+  severity    String   @default("medium")
+  explanation String
+  createdAt   DateTime @default(now())
+
+  review EvidenceQualityReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 7: Experiments =======================
+model Experiment {
+  id                      String   @id @default(cuid())
+  projectId               String
+  hypothesisId            String
+  name                    String
+  description             String?
+  experimentType          String   @default("landing_page_test")
+  status                  String   @default("proposed")
+  ownerUserId             String?
+  primaryMetricId         String?
+  decisionRuleId          String?
+  evidenceQualityReviewId String?
+  startDate               DateTime?
+  endDate                 DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  project        Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  hypothesis     Hypothesis         @relation(fields: [hypothesisId], references: [id])
+  metrics        ExperimentMetric[]
+  decisionRule   DecisionRule?
+  results        ExperimentResult[]
+  surfaces       ExperimentSurface[]
+}
+
+model ExperimentMetric {
+  id           String  @id @default(cuid())
+  experimentId String
+  name         String
+  targetValue  Float?
+  actualValue  Float?
+
+  experiment Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+}
+
+model DecisionRule {
+  id            String  @id @default(cuid())
+  experimentId  String  @unique
+  metricName    String
+  operator      String  @default("gte")
+  threshold     Float
+  thresholdMax  Float?
+  outcomeIfMet  String  @default("supports")
+  outcomeIfNotMet String @default("weakens")
+
+  experiment Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+}
+
+model ExperimentResult {
+  id                      String   @id @default(cuid())
+  experimentId            String
+  projectId               String
+  metricName              String
+  observedValue           Float
+  threshold               Float
+  metThreshold            Boolean
+  decisionRuleOutcome     String   @default("inconclusive")
+  notes                   String?
+  createdByUserId         String
+  createdAt               DateTime @default(now())
+  generatedEvidenceItemId String?
+  generatedLearningLoopId String?
+
+  experiment Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 9: Landing Pages =====================
+model ExperimentSurface {
+  id              String   @id @default(cuid())
+  projectId       String
+  experimentId    String?
+  surfaceType     String   @default("landing_page")
+  linkedEntityId  String
+  status          String   @default("draft")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  experiment Experiment? @relation(fields: [experimentId], references: [id])
+}
+
+model LandingPage {
+  id                String   @id @default(cuid())
+  projectId         String
+  name              String
+  slug              String
+  domain            String?
+  personaId         String
+  offerId           String
+  hypothesisId      String?
+  experimentId      String?
+  journeyStage      String   @default("awareness")
+  status            String   @default("draft")
+  primaryCTAId      String?
+  currentVersionId  String?
+  governanceStatus  String   @default("not_required")
+  seoTitle          String?
+  seoDescription    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions       LandingPageVersion[]
+  ctas           CTA[]
+  contentBlocks  ContentBlock[]
+  pageAnalyticsConfigs PageAnalyticsConfig[]
+}
+
+model LandingPageVersion {
+  id              String   @id @default(cuid())
+  landingPageId   String
+  versionNumber   Int
+  content         String
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  landingPage LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+}
+
+model ContentBlock {
+  id            String @id @default(cuid())
+  landingPageId String
+  blockType     String @default("hero")
+  content       String
+  orderIndex    Int
+
+  landingPage LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+}
+
+model CTA {
+  id            String   @id @default(cuid())
+  landingPageId String
+  label         String
+  url           String?
+  action        String   @default("click")
+  eventName     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  landingPage LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+}
+
+model PageAnalyticsConfig {
+  id              String  @id @default(cuid())
+  landingPageId   String  @unique
+  trackPageViews  Boolean @default(true)
+  trackCtaClicks  Boolean @default(true)
+  trackFormSubmits Boolean @default(false)
+  customEvents    String
+
+  landingPage LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 10: Analytics ========================
+model AnalyticsEvent {
+  id            String   @id @default(cuid())
+  projectId     String
+  eventName     String
+  eventType     String
+  anonymousId   String?
+  userId        String?
+  sessionId     String?
+  landingPageId String?
+  ctaId         String?
+  experimentId  String?
+  variantId     String?
+  source        String?
+  medium        String?
+  campaign      String?
+  metadata      String?
+  occurredAt    DateTime
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model MetricSnapshot {
+  id                String   @id @default(cuid())
+  projectId         String
+  metricName        String
+  metricType        String   @default("count")
+  value             Float
+  periodStart       DateTime
+  periodEnd         DateTime
+  relatedEntityType String?
+  relatedEntityId   String?
+  source            String   @default("manual")
+  createdAt         DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 11: PMF Readiness ====================
+model PMFReadinessAssessment {
+  id                             String   @id @default(cuid())
+  projectId                      String
+  customerDisappointmentScore    Float?
+  totalHighRiskHypotheses        Int      @default(0)
+  unvalidatedHighRiskHypotheses  Int      @default(0)
+  evidenceDistortionCoefficient  Float?
+  validationVelocity             Float?
+  pmfScore                       Float?
+  readinessState                 String   @default("not_ready")
+  explanation                    String   @default("")
+  blockingHypothesisIds          String   @default("[]")
+  createdAt                      DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 12: Learning Loops ===================
+model LearningLoop {
+  id               String   @id @default(cuid())
+  projectId        String
+  sourceEntityType String
+  sourceEntityId   String?
+  outcomeSummary   String
+  insight          String
+  targetEntityType String?
+  targetEntityId   String?
+  actionTaken      String?
+  measurementPlan  String?
+  status           String   @default("open")
+  ownerUserId      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  closedAt         DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 13: Progress Command Center ==========
+model ProgressTrack {
+  id              String   @id @default(cuid())
+  projectId       String
+  name            String
+  type            String   @default("validation")
+  description     String?
+  health          String   @default("unknown")
+  completionScore Float    @default(0)
+  currentFocus    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ==================== MODULE 2: Onboarding Tour ===================
+model UserOnboardingState {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  projectId           String?
+  hasSeenMainTour     Boolean   @default(false)
+  mainTourCompletedAt DateTime?
+  currentTourStep     String?
+  skippedMainTourAt   DateTime?
+  dismissedStepIds    String    @default("[]")
+  completedStepIds    String    @default("[]")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TourStep {
+  id             String  @id @default(cuid())
+  key            String  @unique
+  title          String
+  body           String
+  targetSelector String?
+  route          String?
+  orderIndex     Int
+  actionType     String  @default("next")
+}
+
+// ==================== MODULE 14: AI Logging =======================
+model AILog {
+  id                  String   @id @default(cuid())
+  projectId           String?
+  userId              String
+  functionType        String
+  inputSummary        String?
+  model               String
+  promptVersion       String?
+  outputSchemaVersion String?
+  validationStatus    String   @default("valid")
+  latency             Int?
+  tokenUsage          String?
+  estimatedCost       Float?
+  outputEntityType    String?
+  outputEntityId      String?
+  errorMessage        String?
+  createdAt           DateTime @default(now())
+
+  project Project? @relation(fields: [projectId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+}
+
+// ==================== TRACK B: Governance =========================
+model GovernanceReview {
+  id               String   @id @default(cuid())
+  projectId        String
+  targetEntityType String   @default("landing_page")
+  targetEntityId   String
+  status           String   @default("pending")
+  flaggedClaims    String   @default("[]")
+  reviewedByUserId String?
+  createdAt        DateTime @default(now())
+  reviewedAt       DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
