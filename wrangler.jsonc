@@ -1,6 +1,6 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bmi-platform",
+  "account_id": "0a5d1f864b6e58037f101edbf9580706",
   "pages_build_output_dir": ".open-next",
   "compatibility_date": "2026-06-02",
   "compatibility_flags": [
