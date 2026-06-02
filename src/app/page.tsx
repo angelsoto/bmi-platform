@@ -6,5 +6,5 @@ export default async function Home() {
   if (session?.user) {
     redirect("/dashboard");
   }
-  redirect("/auth/signin");
+  redirect("/auth/signin?auto=demo@bmi-platform.com");
 }
