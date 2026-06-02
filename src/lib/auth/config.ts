@@ -25,24 +25,22 @@ export const authConfig: NextAuthConfig = {
             },
           });
 
-          // Auto-attach seeded projects if admin's projects exist
-          const adminUser = await prisma.user.findUnique({
-            where: { email: "demo@bmi-platform.com" },
+          // Auto-attach seeded projects owned by other users
+          const seedOwner = await prisma.user.findFirst({
+            where: { email: { not: email } },
+            orderBy: { createdAt: "asc" },
           });
-          if (!adminUser) {
-            const firstAdmin = await prisma.user.findFirst({
-              where: { email: { not: email } },
-              orderBy: { createdAt: "asc" },
+          if (seedOwner) {
+            const seedProjects = await prisma.project.findMany({
+              where: { ownerId: seedOwner.id },
+              select: { id: true },
             });
-            if (firstAdmin) {
-              const adminProjects = await prisma.project.findMany({
-                where: { ownerId: firstAdmin.id },
-              });
-              for (const project of adminProjects) {
+            if (seedProjects.length > 0) {
+              for (const p of seedProjects) {
                 await prisma.projectMember.upsert({
-                  where: { userId_projectId: { userId: user.id, projectId: project.id } },
+                  where: { userId_projectId: { userId: user!.id, projectId: p.id } },
                   update: {},
-                  create: { userId: user.id, projectId: project.id, role: "member" },
+                  create: { userId: user!.id, projectId: p.id, role: "member" },
                 });
               }
             }
