@@ -1,8 +1,3 @@
-/**
- * Seed data for the Command Center tour steps (Section 7.5).
- * Run via: npx tsx src/lib/db/tour-seed.ts
- */
-
 import { prisma } from "./prisma";
 
 const TOUR_STEPS = [
@@ -11,7 +6,7 @@ const TOUR_STEPS = [
     title: "Welcome to the Command Center",
     body: "This is your operating dashboard for validation progress. Every widget tracks a piece of your venture's evidence journey.",
     orderIndex: 1,
-    route: "/dashboard",
+    targetSelector: "[data-tour='project-header']",
     actionType: "next",
   },
   {
@@ -19,7 +14,7 @@ const TOUR_STEPS = [
     title: "Your Validation Spine",
     body: "MVV → Hypotheses → Experiments → Pivots → PMF. Progress by evidence, not opinion.",
     orderIndex: 2,
-    route: "/dashboard",
+    targetSelector: "[data-tour='validation-spine']",
     actionType: "next",
   },
   {
@@ -75,7 +70,7 @@ const TOUR_STEPS = [
     title: "Your Next Best Action",
     body: "Review your top-risk hypothesis and create your first experiment.",
     orderIndex: 9,
-    route: "/dashboard",
+    targetSelector: "[data-tour='quick-actions']",
     actionType: "complete",
   },
 ];
@@ -92,7 +87,6 @@ export async function seedTourSteps() {
   console.log(`Seeded ${TOUR_STEPS.length} tour steps.`);
 }
 
-// Run directly
 seedTourSteps()
   .then(() => process.exit(0))
   .catch((e) => {

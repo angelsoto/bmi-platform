@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ChevronRight } from "lucide-react";
 
 export default async function LoopsPage({
   params,
@@ -32,16 +33,20 @@ export default async function LoopsPage({
           <p className="mt-1 text-sm text-gray-500">Learning loops are created automatically when you record experiment results.</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {loops.map((loop) => (
-            <div key={loop.id} className="rounded-lg border bg-white p-4 shadow-widget">
+            <Link
+              key={loop.id}
+              href={`/dashboard/${projectId}/loops/${loop.id}`}
+              className="group block rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
                     <StatusBadge status={loop.status} />
                     <span className="text-xs text-gray-400">{loop.sourceEntityType.replace(/_/g, " ")}</span>
                   </div>
-                  <h3 className="font-medium text-navy-900">{loop.outcomeSummary}</h3>
+                  <h3 className="font-medium text-navy-900 group-hover:text-navy-700">{loop.outcomeSummary}</h3>
                   <div className="mt-2 space-y-1 text-sm text-gray-600">
                     <p><span className="font-medium text-gray-700">Insight:</span> {loop.insight}</p>
                     {loop.actionTaken && (
@@ -52,13 +57,14 @@ export default async function LoopsPage({
                     )}
                   </div>
                 </div>
+                <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-gray-300 group-hover:text-navy-500" />
               </div>
 
               <div className="mt-3 flex items-center gap-3 text-xs text-gray-400">
                 <span>Created: {loop.createdAt.toLocaleDateString()}</span>
                 {loop.closedAt && <span>Closed: {loop.closedAt.toLocaleDateString()}</span>}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

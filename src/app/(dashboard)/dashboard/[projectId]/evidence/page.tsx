@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Shield, Flag } from "lucide-react";
+import { Shield, Flag, ChevronRight } from "lucide-react";
 
 export default async function EvidencePage({
   params,
@@ -15,10 +16,7 @@ export default async function EvidencePage({
 
   const evidenceItems = await prisma.evidenceItem.findMany({
     where: { projectId },
-    include: {
-      qualityReviews: { include: { biasFlags: true }, take: 1 },
-      hypothesis: { select: { title: true } },
-    },
+    include: { qualityReviews: { include: { biasFlags: true }, take: 1 }, hypothesis: { select: { title: true, id: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -42,29 +40,35 @@ export default async function EvidencePage({
             const biasCount = review?.biasFlags?.length ?? 0;
 
             return (
-              <div key={item.id} className="rounded-lg border bg-white p-4 shadow-widget">
-                <div className="flex items-start justify-between gap-4">
+              <div key={item.id} className="rounded-lg border bg-white shadow-widget">
+                <Link
+                  href={item.relatedHypothesisId ? `/dashboard/${projectId}/hypotheses/${item.relatedHypothesisId}` : `/dashboard/${projectId}/evidence`}
+                  className="group flex items-start justify-between gap-4 p-4 hover:bg-gray-50 transition-colors border-b border-gray-100"
+                >
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={item.evidenceStrength} />
                       <span className="text-xs text-gray-400">{item.sourceType.replace(/_/g, " ")}</span>
                       {item.hypothesis && (
-                        <span className="text-xs text-gray-400">for &quot;{item.hypothesis.title}&quot;</span>
+                        <span className="text-xs text-gray-400">for &ldquo;{item.hypothesis.title}&rdquo;</span>
                       )}
                     </div>
-                    <p className="mt-2 text-sm text-gray-900">{item.summary}</p>
+                    <p className="mt-2 text-sm text-gray-900 line-clamp-2">{item.summary}</p>
                   </div>
 
-                  {biasCount > 0 && (
-                    <div className="flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
-                      <Flag className="h-3 w-3" />
-                      {biasCount} flag{biasCount !== 1 ? "s" : ""}
-                    </div>
-                  )}
-                </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {biasCount > 0 && (
+                      <div className="flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
+                        <Flag className="h-3 w-3" />
+                        {biasCount}
+                      </div>
+                    )}
+                    <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-navy-500" />
+                  </div>
+                </Link>
 
                 {review && review.biasFlags.length > 0 && (
-                  <div className="mt-3 space-y-1 border-t pt-2">
+                  <div className="px-4 py-3 space-y-1">
                     <p className="text-xs font-medium text-amber-700">Bias Flags</p>
                     {review.biasFlags.map((flag, i) => (
                       <div key={i} className="flex items-start gap-2 text-xs text-gray-600">

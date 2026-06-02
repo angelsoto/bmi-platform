@@ -47,7 +47,7 @@ export default async function ProjectDetailPage({
   return (
     <div className="space-y-6">
       <TourPopover projectId={projectId} />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-tour="project-header">
         <div>
           <h1 className="text-2xl font-bold text-navy-900">{project.name}</h1>
           {project.description && <p className="mt-1 text-sm text-gray-500">{project.description}</p>}
@@ -58,8 +58,8 @@ export default async function ProjectDetailPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 rounded-lg border bg-white p-4 shadow-widget">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-2 rounded-lg border bg-white p-4 shadow-widget" data-tour="hypotheses">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-navy-700" />
@@ -90,7 +90,7 @@ export default async function ProjectDetailPage({
           )}
         </div>
 
-        <Link href={`/dashboard/${projectId}/pmf`}
+        <Link href={`/dashboard/${projectId}/pmf`} data-tour="pmf"
           className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
           <div className="flex items-center gap-2 mb-3">
             <Gauge className="h-4 w-4 text-navy-700" />
@@ -127,8 +127,8 @@ export default async function ProjectDetailPage({
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <Link href={`/dashboard/${projectId}/experiments`}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link href={`/dashboard/${projectId}/experiments`} data-tour="experiments"
           className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export default async function ProjectDetailPage({
           )}
         </Link>
 
-        <Link href={`/dashboard/${projectId}/evidence`}
+        <Link href={`/dashboard/${projectId}/evidence`} data-tour="evidence"
           className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ export default async function ProjectDetailPage({
           )}
         </Link>
 
-        <Link href={`/dashboard/${projectId}/loops`}
+        <Link href={`/dashboard/${projectId}/loops`} data-tour="loops"
           className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -223,7 +223,7 @@ export default async function ProjectDetailPage({
         </Link>
       </div>
 
-      <div className="rounded-lg border bg-white p-5 shadow-widget">
+      <div className="rounded-lg border bg-white p-5 shadow-widget" data-tour="quick-actions">
         <h2 className="text-sm font-semibold text-navy-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Link href={`/dashboard/${projectId}/concept`}
@@ -250,7 +250,7 @@ export default async function ProjectDetailPage({
       </div>
 
       {project._count.landingPages > 0 && (
-        <div className="rounded-lg border bg-white p-4 shadow-widget">
+        <div className="rounded-lg border bg-white p-4 shadow-widget" data-tour="surfaces">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4 text-navy-700" />
@@ -275,7 +275,7 @@ export default async function ProjectDetailPage({
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4" data-tour="validation-spine">
         {[
           { icon: Target, count: project._count.hypotheses, label: "Hypotheses", color: "text-navy-500" },
           { icon: FlaskConical, count: project._count.experiments, label: "Experiments", color: "text-cyan-500" },
