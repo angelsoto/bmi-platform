@@ -5,42 +5,15 @@ import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user) redirect("/auth/signin");
-  const userId = session.user.id;
-
-  // Auto-attach seeded projects if user has none
-  const userProjects = await prisma.projectMember.count({
-    where: { userId },
-  });
-
-  if (userProjects === 0) {
-    // Find projects owned by admin and add this user as member
-    const adminUser = await prisma.user.findUnique({
-      where: { email: "admin@test.com" },
-    });
-    if (adminUser) {
-      const adminProjects = await prisma.project.findMany({
-        where: { ownerId: adminUser.id },
-      });
-      for (const project of adminProjects) {
-        const existing = await prisma.projectMember.findUnique({
-          where: { userId_projectId: { userId, projectId: project.id } },
-        });
-        if (!existing) {
-          await prisma.projectMember.create({
-            data: { userId, projectId: project.id, role: "member" },
-          });
-        }
-      }
-    }
-  }
+  if (!session?.user) redirect("/auth/signin?auto=demo@bmi-platform.com");
 
   const projects = await prisma.project.findMany({
     where: {
-      members: { some: { userId } },
+      members: { some: { userId: session.user.id } },
     },
     include: {
-      _count: { select: { hypotheses: true, experiments: true } },
+      _count: { select: { hypotheses: true, experiments: true, evidenceItems: true, learningLoops: true } },
+      pmfAssessments: { orderBy: { createdAt: "desc" }, take: 1, select: { pmfScore: true, readinessState: true } },
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -50,7 +23,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-navy-900">Command Center</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Your validation workspace
+          Your validation workspace — select a project to drill in
         </p>
       </div>
 
@@ -66,12 +39,6 @@ export default async function DashboardPage() {
           >
             Create Project
           </Link>
-          <Link
-            href="/dashboard/concept"
-            className="mt-2 text-sm text-indigo-600 hover:text-indigo-800"
-          >
-            Or start with a concept intake
-          </Link>
         </div>
       ) : (
         <>
@@ -86,35 +53,91 @@ export default async function DashboardPage() {
               + New Project
             </Link>
           </div>
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/dashboard/${project.id}`}
-                className="rounded-lg border bg-white p-4 shadow-widget transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-navy-900">{project.name}</h3>
-                  {project.proofCaseMode && (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
-                      Demo
-                    </span>
+            {projects.map((project) => {
+              const pmf = project.pmfAssessments[0];
+              const pmfScore = pmf?.pmfScore ?? 0;
+              const pmfColor = pmfScore >= 0.6 ? "bg-teal-500" : pmfScore >= 0.3 ? "bg-amber-500" : "bg-gray-300";
+              const evidenceCount = project._count.evidenceItems;
+              const loopCount = project._count.learningLoops;
+
+              return (
+                <Link
+                  key={project.id}
+                  href={`/dashboard/${project.id}`}
+                  className="group rounded-lg border bg-white p-5 shadow-widget transition-all hover:shadow-md hover:border-navy-300"
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-navy-900 group-hover:text-navy-700">{project.name}</h3>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {project.proofCaseMode && (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                          Demo
+                        </span>
+                      )}
+                      {pmf && (
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          pmf.readinessState === "strong_signal" || pmf.readinessState === "scale_ready"
+                            ? "bg-teal-100 text-teal-700"
+                            : pmf.readinessState === "emerging"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-gray-100 text-gray-500"
+                        }`}>
+                          {pmf.readinessState.replace(/_/g, " ")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  {project.description && (
+                    <p className="mt-1.5 text-xs text-gray-500 line-clamp-2">
+                      {project.description}
+                    </p>
                   )}
-                </div>
-                {project.description && (
-                  <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                    {project.description}
-                  </p>
-                )}
-                <div className="mt-3 flex gap-4 text-xs text-gray-400">
-                  <span>{project._count.hypotheses} hypotheses</span>
-                  <span>{project._count.experiments} experiments</span>
-                </div>
-                <div className="mt-2 text-xs text-gray-400 capitalize">
-                  Stage: {project.currentStage}
-                </div>
-              </Link>
-            ))}
+
+                  {/* PMF Bar */}
+                  {pmf && (
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                        <span>PMF Score</span>
+                        <span className="font-semibold text-navy-700">{(pmfScore * 100).toFixed(0)}%</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                        <div
+                          className={`h-full rounded-full transition-all ${pmfColor}`}
+                          style={{ width: `${pmfScore * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Metrics Grid */}
+                  <div className="mt-3 grid grid-cols-3 gap-2 border-t pt-3">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-navy-900">{project._count.hypotheses}</div>
+                      <div className="text-[10px] text-gray-400">Hypotheses</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-navy-900">{project._count.experiments}</div>
+                      <div className="text-[10px] text-gray-400">Experiments</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-navy-900">{evidenceCount}</div>
+                      <div className="text-[10px] text-gray-400">Evidence</div>
+                    </div>
+                  </div>
+
+                  {/* Stage + Loops footer */}
+                  <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400">
+                    <span className="capitalize">Stage: {project.currentStage}</span>
+                    {loopCount > 0 && <span>{loopCount} loop{loopCount !== 1 ? "s" : ""}</span>}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </>
       )}
