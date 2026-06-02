@@ -1,0 +1,24 @@
+name: Build and Deploy to Cloudflare Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build with OpenNext
+        run: npx opennextjs-cloudflare build
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages deploy .open-next --project-name=bmi-platform
+        env:
+          CLOUDFLARE_ACCOUNT_ID: "0a5d1f864b6e58037f101edbf9580706"

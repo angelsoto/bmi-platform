@@ -1,5 +1,4 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bmi-platform",
   "pages_build_output_dir": ".open-next",
   "compatibility_date": "2026-06-02",
