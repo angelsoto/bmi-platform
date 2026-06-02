@@ -62,7 +62,11 @@ export default async function ExperimentsPage({
                     )}
                     {exp.hypothesis && (
                       <p className="mt-1 text-xs text-gray-400">
-                        Testing: &ldquo;{exp.hypothesis.title}&rdquo;
+                        Testing: &ldquo;
+                        <Link href={`/dashboard/${projectId}/hypotheses/${exp.hypothesis.id}`}
+                          className="text-indigo-600 hover:text-indigo-800 hover:underline"
+                        >{exp.hypothesis.title}</Link>
+                        &rdquo;
                       </p>
                     )}
                   </div>

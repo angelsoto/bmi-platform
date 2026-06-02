@@ -133,7 +133,6 @@ export default async function PMFPage({
 }
 
 async function HypothesisList({ ids }: { ids: string[] }) {
-  const { prisma } = await import("@/lib/db/prisma");
   const hypotheses = await prisma.hypothesis.findMany({
     where: { id: { in: ids } },
     select: { id: true, title: true, evidenceStrength: true },

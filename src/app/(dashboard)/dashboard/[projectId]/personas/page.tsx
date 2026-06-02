@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { PersonaForm } from "@/components/personas-offers/PersonaForm";
-import { Users, AlertTriangle } from "lucide-react";
+import { Users, AlertTriangle, ChevronRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function PersonasPage() {
@@ -65,10 +66,16 @@ export default function PersonasPage() {
             />
           ) : (
             personas.map((p: any) => (
-              <div key={p.id} className="rounded-md border bg-white p-3 shadow-sm">
-                <h3 className="text-sm font-medium text-navy-900">{p.name}</h3>
-                <p className="text-xs text-gray-500">{p.primaryPain}</p>
-              </div>
+              <Link key={p.id} href={`/dashboard/${params.projectId}/personas/${p.id}`}
+                className="group block rounded-md border bg-white p-3 shadow-sm hover:shadow-md hover:border-navy-300 transition-all">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium text-navy-900 group-hover:text-navy-700">{p.name}</h3>
+                    <p className="text-xs text-gray-500">{p.primaryPain}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-gray-300 group-hover:text-navy-500" />
+                </div>
+              </Link>
             ))
           )}
         </div>
