@@ -8,13 +8,13 @@ export const authConfig: NextAuthConfig = {
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email) return null;
 
-        // Dev-mode: auto-create or find user by email
         const email = credentials.email as string;
+
+        // Demo mode: auto-create or find user by email
         let user = await prisma.user.findUnique({ where: { email } });
 
         if (!user) {
@@ -24,6 +24,27 @@ export const authConfig: NextAuthConfig = {
               name: email.split("@")[0],
             },
           });
+
+          // Auto-attach seeded projects owned by the seed user
+          const seedOwner = await prisma.user.findFirst({
+            where: { email: { not: email }, projects: { some: {} } },
+            orderBy: { createdAt: "asc" },
+          });
+          if (seedOwner) {
+            const seedProjects = await prisma.project.findMany({
+              where: { ownerId: seedOwner.id },
+              select: { id: true },
+            });
+            if (seedProjects.length > 0) {
+              for (const p of seedProjects) {
+                await prisma.projectMember.upsert({
+                  where: { userId_projectId: { userId: user!.id, projectId: p.id } },
+                  update: {},
+                  create: { userId: user!.id, projectId: p.id, role: "member" },
+                });
+              }
+            }
+          }
         }
 
         return {
@@ -52,5 +73,4 @@ export const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
-  trustHost: true,
 };

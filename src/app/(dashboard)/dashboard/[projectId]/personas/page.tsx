@@ -3,18 +3,30 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { PersonaForm } from "@/components/personas-offers/PersonaForm";
-import { Users } from "lucide-react";
+import { Users, AlertTriangle } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function PersonasPage() {
   const params = useParams<{ projectId: string }>();
   const [personas, setPersonas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadPersonas = async () => {
-    const res = await fetch(`/api/projects/${params.projectId}/personas`);
-    if (res.ok) setPersonas(await res.json());
-    setLoading(false);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/projects/${params.projectId}/personas`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Failed to load (${res.status})`);
+      }
+      setPersonas(await res.json());
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { loadPersonas(); }, [params.projectId]);
@@ -32,7 +44,19 @@ export default function PersonasPage() {
         <div className="space-y-2">
           <h2 className="text-sm font-semibold text-navy-900">Existing Personas</h2>
           {loading ? (
-            <p className="text-sm text-gray-400">Loading...</p>
+            <div className="space-y-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-16 animate-pulse rounded-md border bg-white p-3">
+                  <div className="h-4 w-3/4 rounded bg-gray-200" />
+                  <div className="mt-2 h-3 w-1/2 rounded bg-gray-100" />
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              {error}
+            </div>
           ) : personas.length === 0 ? (
             <EmptyState
               icon={Users}

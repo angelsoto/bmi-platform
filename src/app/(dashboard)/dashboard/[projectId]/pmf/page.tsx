@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Gauge } from "lucide-react";
 
 export default async function PMFPage({
@@ -109,14 +110,44 @@ export default async function PMFPage({
           </div>
 
           {/* Blockers */}
-          {latestPmf.blockingHypothesisIds !== "[]" && (
-            <div className="rule-box rule-box--blocker">
-              <h3 className="text-sm font-semibold text-red-700 mb-1">Blocking Hypotheses</h3>
-              <p className="text-xs text-red-600">These hypotheses are holding your PMF score down:</p>
-            </div>
-          )}
+          {(() => {
+            const ids: string[] = JSON.parse(latestPmf.blockingHypothesisIds || "[]");
+            if (ids.length === 0) return null;
+            return (
+              <div className="rule-box rule-box--blocker">
+                <h3 className="text-sm font-semibold text-red-700 mb-1">
+                  Blocking Hypotheses ({ids.length})
+                </h3>
+                <p className="text-xs text-red-600 mb-2">
+                  These hypotheses are holding your PMF score down:
+                </p>
+                <HypothesisList ids={ids} />
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
+  );
+}
+
+async function HypothesisList({ ids }: { ids: string[] }) {
+  const { prisma } = await import("@/lib/db/prisma");
+  const hypotheses = await prisma.hypothesis.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, title: true, evidenceStrength: true },
+  });
+  if (hypotheses.length === 0) return <p className="text-xs text-gray-500">Loading...</p>;
+  return (
+    <ul className="space-y-1">
+      {hypotheses.map((h) => (
+        <li key={h.id} className="flex items-center justify-between text-xs text-red-700">
+          <span>{h.title}</span>
+          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium">
+            {h.evidenceStrength}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
