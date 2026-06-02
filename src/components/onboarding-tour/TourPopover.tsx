@@ -129,14 +129,6 @@ export function TourPopover({ projectId }: TourPopoverProps) {
           </button>
 
           <div className="flex items-center gap-2">
-            {!isLast && (
-              <button
-                onClick={skipTour}
-                className="text-xs text-gray-400 hover:text-gray-600"
-              >
-                Skip
-              </button>
-            )}
             <button
               onClick={handleNext}
               className="rounded-md bg-navy-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-navy-800"

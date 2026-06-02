@@ -8,13 +8,13 @@ export const authConfig: NextAuthConfig = {
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email) return null;
 
-        // Dev-mode: auto-create or find user by email
         const email = credentials.email as string;
+
+        // Demo mode: auto-create or find user by email
         let user = await prisma.user.findUnique({ where: { email } });
 
         if (!user) {
@@ -24,6 +24,29 @@ export const authConfig: NextAuthConfig = {
               name: email.split("@")[0],
             },
           });
+
+          // Auto-attach seeded projects if admin's projects exist
+          const adminUser = await prisma.user.findUnique({
+            where: { email: "demo@bmi-platform.com" },
+          });
+          if (!adminUser) {
+            const firstAdmin = await prisma.user.findFirst({
+              where: { email: { not: email } },
+              orderBy: { createdAt: "asc" },
+            });
+            if (firstAdmin) {
+              const adminProjects = await prisma.project.findMany({
+                where: { ownerId: firstAdmin.id },
+              });
+              for (const project of adminProjects) {
+                await prisma.projectMember.upsert({
+                  where: { userId_projectId: { userId: user.id, projectId: project.id } },
+                  update: {},
+                  create: { userId: user.id, projectId: project.id, role: "member" },
+                });
+              }
+            }
+          }
         }
 
         return {
@@ -52,5 +75,4 @@ export const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
-  trustHost: true,
 };
