@@ -23,100 +23,30 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Call AI deconstruction chain
+    // Call AI deconstruction
     const ai = getAIProvider();
     const output = await ai.deconstruct(intake.rawInput);
 
-    // Create assumptions and hypotheses in a transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Update intake status
-      await tx.conceptIntake.update({
-        where: { id: intakeId },
-        data: {
-          status: "processed",
-          parsedSummary: output.summary,
-          processedAt: new Date(),
-        },
-      });
-
-      // Create assumptions
-      const assumptions = [];
-      for (const a of output.assumptions) {
-        const assumption = await tx.businessAssumption.create({
-          data: {
-            projectId: intake.projectId,
-            conceptIntakeId: intakeId,
-            statement: a.statement,
-            category: a.category,
-            riskLevel: a.riskLevel,
-          },
-        });
-        assumptions.push(assumption);
-      }
-
-      // Create hypotheses
-      const hypotheses = [];
-      for (const h of output.hypotheses) {
-        const hypothesis = await tx.hypothesis.create({
-          data: {
-            projectId: intake.projectId,
-            title: h.title,
-            statement: h.statement,
-            type: h.type,
-            status: "active",
-            confidence: "medium",
-          },
-        });
-
-        // Create risk rank
-        await tx.hypothesisRiskRank.create({
-          data: {
-            hypothesisId: hypothesis.id,
-            projectId: intake.projectId,
-            survivalCriticality: h.survivalCriticality,
-            uncertainty: "high",
-            validationPriorityScore: null, // computed below
-            rationale: `AI-generated from concept intake. Recommended first test: ${h.recommendedFirstTest}`,
-          },
-        });
-
-        hypotheses.push(hypothesis);
-      }
-
-      // Create draft persona if suggested
-      let persona = null;
-      if (output.suggestedPersona) {
-        persona = await tx.persona.create({
-          data: {
-            projectId: intake.projectId,
-            name: output.suggestedPersona.name,
-            primaryPain: output.suggestedPersona.primaryPain,
-            description: `AI-generated from concept intake: ${intake.rawInput.slice(0, 200)}`,
-            relatedHypothesisIds: JSON.stringify(hypotheses.map((h) => h.id)),
-            createdByUserId: userId,
-          },
-        });
-      }
-
-      // Create draft offer if suggested
-      let offer = null;
-      if (output.suggestedOffer) {
-        offer = await tx.offer.create({
-          data: {
-            projectId: intake.projectId,
-            name: output.suggestedOffer.name,
-            valueProposition: output.suggestedOffer.valueProposition,
-            format: "service",
-            relatedHypothesisIds: JSON.stringify(hypotheses.map((h) => h.id)),
-            createdByUserId: userId,
-          },
-        });
-      }
-
-      return { intakeId, assumptions, hypotheses, persona, offer, summary: output.summary, suggestedNextActions: output.suggestedNextActions };
+    // Store the output as parsedSummary, but DON'T create records yet
+    // The user will select which items to accept via the accept endpoint
+    await prisma.conceptIntake.update({
+      where: { id: intakeId },
+      data: {
+        status: "processed",
+        parsedSummary: output.summary,
+        processedAt: new Date(),
+      },
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      intakeId,
+      summary: output.summary,
+      assumptions: output.assumptions,
+      hypotheses: output.hypotheses,
+      suggestedPersona: output.suggestedPersona,
+      suggestedOffer: output.suggestedOffer,
+      suggestedNextActions: output.suggestedNextActions,
+    });
   } catch (error: any) {
     const status = error.status || 500;
     return NextResponse.json({ error: error.message }, { status });
