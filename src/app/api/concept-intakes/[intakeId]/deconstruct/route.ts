@@ -37,6 +37,19 @@ export async function POST(
         processedAt: new Date(),
       },
     });
+    // Log AI call
+    await prisma.aILog.create({
+      data: {
+        projectId: intake.projectId,
+        userId,
+        functionType: "concept_deconstruction",
+        inputSummary: intake.rawInput.substring(0, 200),
+        model: "mock",
+        outputEntityType: "concept_intake",
+        outputEntityId: intakeId,
+      },
+    });
+
 
     return NextResponse.json({
       intakeId,

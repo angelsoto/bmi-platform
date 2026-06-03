@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Shield, Flag, ChevronRight } from "lucide-react";
+import { EvidenceStrength } from "@/components/ui/EvidenceStrength";
+import { Shield, Flag, ChevronRight, ArrowRight } from "lucide-react";
 
 const SOURCE_TYPES = ["interview", "survey", "experiment_result", "manual_note", "analytics"];
 const STRENGTH_LEVELS = ["weak", "moderate", "strong"];
@@ -81,6 +82,13 @@ export default async function EvidencePage({
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={item.evidenceStrength} />
+                    {review && review.originalEvidenceStrength && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <EvidenceStrength strength={review.originalEvidenceStrength} size={3} />
+                        <ArrowRight className="h-3 w-3 text-gray-300" />
+                        <EvidenceStrength strength={review.adjustedEvidenceStrength} size={3} showLabel />
+                      </div>
+                    )}
                       <span className="text-xs text-gray-400">{item.sourceType.replace(/_/g, " ")}</span>
                       {item.hypothesis && (
                         <span className="text-xs text-gray-400">for &ldquo;{item.hypothesis.title}&rdquo;</span>

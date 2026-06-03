@@ -6,7 +6,7 @@ import { getAIProvider } from "@/lib/ai/client";
 export async function POST(req: Request, { params }: { params: Promise<{ evidenceId: string }> }) {
   try {
     const { evidenceId } = await params;
-    await requireAuth();
+    const { userId } = await requireAuth();
 
     const evidence = await prisma.evidenceItem.findUnique({ where: { id: evidenceId } });
     if (!evidence) return NextResponse.json({ error: "Evidence not found" }, { status: 404 });
@@ -20,6 +20,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ evidenc
         evidenceItemId: evidenceId,
         sourceEntityType: evidence.sourceType,
         sourceEntityId: evidence.relatedHypothesisId || evidenceId,
+        originalEvidenceStrength: evidence.evidenceStrength,
         adjustedEvidenceStrength: review.adjustedEvidenceStrength,
         recommendedDisconfirmationTest: review.recommendedDisconfirmationTest,
       },
@@ -32,6 +33,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ evidenc
     }
 
     await prisma.evidenceItem.update({ where: { id: evidenceId }, data: { evidenceStrength: review.adjustedEvidenceStrength } });
+    // Log AI call
+    await prisma.aILog.create({
+      data: {
+        projectId: evidence.projectId,
+        userId,
+        functionType: "evidence_quality_review",
+        inputSummary: (evidence.rawText || evidence.summary).substring(0, 200),
+        model: "mock",
+        outputEntityType: "evidence_quality_review",
+        outputEntityId: qualityReview.id,
+      },
+    });
+
 
     return NextResponse.json(qualityReview, { status: 201 });
   } catch (error: any) {

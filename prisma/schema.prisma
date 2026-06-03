@@ -267,6 +267,7 @@ model EvidenceQualityReview {
   evidenceItemId                  String?
   sourceEntityType                String   @default("manual_note")
   sourceEntityId                  String
+  originalEvidenceStrength        String   @default("weak")
   adjustedEvidenceStrength        String   @default("weak")
   recommendedDisconfirmationTest  String?
   createdAt                       DateTime @default(now())

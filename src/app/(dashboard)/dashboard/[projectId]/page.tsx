@@ -6,6 +6,7 @@ import {
   Lightbulb, Target, FlaskConical, Globe, Gauge, Shield, RefreshCw, Users, ArrowRight, ChevronRight
 } from "lucide-react";
 import { TourPopover } from "@/components/onboarding-tour/TourPopover";
+import { DataFreshness } from "@/components/ui/DataFreshness";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export default async function ProjectDetailPage({
@@ -53,6 +54,7 @@ export default async function ProjectDetailPage({
         <div>
           <h1 className="text-2xl font-bold text-navy-900">{project.name}</h1>
           {project.description && <p className="mt-1 text-sm text-gray-500">{project.description}</p>}
+            <DataFreshness timestamp={project.updatedAt} label="Project" />
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <span className="rounded-full bg-blueprint-100 px-2 py-1 capitalize">{project.businessType.replace(/_/g, " ")}</span>
@@ -118,6 +120,9 @@ export default async function ProjectDetailPage({
                       "bg-teal-100 text-teal-700"
                     }`}>{h.type}</span>
                     <span className="text-xs text-gray-500">Priority: {h.riskRanks[0]?.validationPriorityScore ?? "?"}</span>
+                    {h.riskRanks[0]?.rationale && (
+                      <span className="text-[10px] text-indigo-500 italic truncate ml-2">{h.riskRanks[0].rationale}</span>
+                    )}
                   </div>
                   <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-gray-300 group-hover:text-navy-500" />
                 </Link>
@@ -314,6 +319,11 @@ export default async function ProjectDetailPage({
             className="flex items-center gap-3 rounded-md border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-medium text-teal-700 hover:bg-teal-100 transition-colors">
             <Gauge className="h-4 w-4 shrink-0" />
             PMF Dashboard
+          </Link>
+          <Link href={`/dashboard/${projectId}/mvv`}
+            className="flex items-center gap-3 rounded-md border border-navy-200 bg-navy-50 px-4 py-3 text-sm font-medium text-navy-700 hover:bg-navy-100 transition-colors">
+            <Target className="h-4 w-4 shrink-0" />
+            MVV Statement
           </Link>
         </div>
       </div>
