@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createProgressTrackSchema } from "@/lib/bmi/schemas/more";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -21,16 +23,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
     const { projectId } = await params;
     await authorizeProject(projectId);
     const body = await req.json();
+    const result = validateBody(createProgressTrackSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const item = await prisma.progressTrack.create({
       data: {
         projectId,
-        name: body.name,
-        type: body.type || "validation",
-        description: body.description,
-        health: body.health || "unknown",
-        completionScore: body.completionScore,
-        currentFocus: body.currentFocus,
+        name: d.name,
+        type: d.type,
+        description: d.description,
+        health: d.health,
+        completionScore: d.completionScore,
+        currentFocus: d.currentFocus,
       },
     });
     return NextResponse.json(item, { status: 201 });

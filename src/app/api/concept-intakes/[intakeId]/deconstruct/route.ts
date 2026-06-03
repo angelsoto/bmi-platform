@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
-import { getAIProvider } from "@/lib/ai/client";
+import { getAIProvider, getLastAIResult } from "@/lib/ai/client";
 
 export async function POST(
   req: Request,
@@ -38,13 +38,16 @@ export async function POST(
       },
     });
     // Log AI call
+    const aiResult = getLastAIResult();
     await prisma.aILog.create({
       data: {
         projectId: intake.projectId,
         userId,
         functionType: "concept_deconstruction",
         inputSummary: intake.rawInput.substring(0, 200),
-        model: "mock",
+        model: aiResult?.model || "mock",
+        tokenUsage: aiResult?.tokenUsage ? JSON.stringify(aiResult.tokenUsage) : undefined,
+        latency: aiResult?.latency,
         outputEntityType: "concept_intake",
         outputEntityId: intakeId,
       },

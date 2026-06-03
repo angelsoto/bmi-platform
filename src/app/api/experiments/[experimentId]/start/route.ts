@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { startExperimentSchema } from "@/lib/bmi/schemas/experiments";
 
 export async function POST(req: Request, { params }: { params: Promise<{ experimentId: string }> }) {
   try {
     const { experimentId } = await params;
     await requireAuth();
+    const body = await req.json();
+    const result = validateBody(startExperimentSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
 
     const experiment = await prisma.experiment.findUnique({
       where: { id: experimentId },

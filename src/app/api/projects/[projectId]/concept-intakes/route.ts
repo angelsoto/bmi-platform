@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createIntakeSchema } from "@/lib/bmi/schemas/project";
 
 export async function GET(
   req: Request,
@@ -30,18 +32,16 @@ export async function POST(
     const { projectId } = await params;
     const { userId } = await authorizeProject(projectId);
     const body = await req.json();
-    const { rawInput, inputType } = body;
-
-    if (!rawInput) {
-      return NextResponse.json({ error: "rawInput is required" }, { status: 400 });
-    }
+    const result = validateBody(createIntakeSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const intake = await prisma.conceptIntake.create({
       data: {
         projectId,
         userId,
-        rawInput,
-        inputType: inputType || "typed_text",
+        rawInput: d.rawInput,
+        inputType: d.inputType,
       },
     });
 

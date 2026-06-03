@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { updateOnboardingSchema } from "@/lib/bmi/schemas/more";
 
 export async function GET() {
   try {
@@ -30,11 +32,16 @@ export async function PATCH(req: Request) {
   try {
     const { userId } = await requireAuth();
     const body = await req.json();
+    const result = validateBody(updateOnboardingSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const state = await prisma.userOnboardingState.upsert({
       where: { userId },
-      update: body,
-      create: { userId, ...body },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      update: d as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: { userId, ...(d as any) },
     });
 
     return NextResponse.json(state);

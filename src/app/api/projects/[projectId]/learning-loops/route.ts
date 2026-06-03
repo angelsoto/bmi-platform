@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createLearningLoopSchema } from "@/lib/bmi/schemas/more";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -18,16 +20,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
     const { projectId } = await params;
     const { userId } = await authorizeProject(projectId);
     const body = await req.json();
+    const result = validateBody(createLearningLoopSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const loop = await prisma.learningLoop.create({
       data: {
         projectId,
-        sourceEntityType: body.sourceEntityType,
-        sourceEntityId: body.sourceEntityId,
-        outcomeSummary: body.outcomeSummary,
-        insight: body.insight,
-        targetEntityType: body.targetEntityType,
-        targetEntityId: body.targetEntityId,
+        sourceEntityType: d.sourceEntityType,
+        sourceEntityId: d.sourceEntityId,
+        outcomeSummary: d.outcomeSummary,
+        insight: d.insight || "",
+        targetEntityType: d.targetEntityType,
+        targetEntityId: d.targetEntityId,
         ownerUserId: userId,
       },
     });

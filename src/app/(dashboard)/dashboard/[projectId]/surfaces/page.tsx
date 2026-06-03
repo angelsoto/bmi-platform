@@ -1,29 +1,40 @@
-import { prisma } from "@/lib/db/prisma";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
+import { LandingPageForm } from "@/components/surfaces/LandingPageForm";
+import { Globe, AlertTriangle, ChevronRight, Plus, Minus } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Globe, ChevronRight, Plus } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 
-export default async function SurfacesPage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
-  const { projectId } = await params;
-  const session = await auth();
-  if (!session?.user) redirect("/auth/signin");
+export default function SurfacesPage() {
+  const params = useParams<{ projectId: string }>();
+  const [landingPages, setLandingPages] = useState<any[]>([]);
+  const [surfaces, setSurfaces] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
-  const landingPages = await prisma.landingPage.findMany({
-    where: { projectId },
-    include: { ctas: true, contentBlocks: { take: 3, orderBy: { orderIndex: "asc" } } },
-    orderBy: { updatedAt: "desc" },
-  });
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [lpRes, sRes] = await Promise.all([
+        fetch(`/api/projects/${params.projectId}/landing-pages`),
+        fetch(`/api/projects/${params.projectId}/experiment-surfaces`),
+      ]);
+      setLandingPages(lpRes.ok ? await lpRes.json() : []);
+      setSurfaces(sRes.ok ? await sRes.json() : []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const surfaces = await prisma.experimentSurface.findMany({
-    where: { projectId }, orderBy: { createdAt: "desc" },
-  });
+  useEffect(() => { loadData(); }, [params.projectId]);
 
   return (
     <div className="space-y-6">
@@ -33,20 +44,28 @@ export default async function SurfacesPage({
           <h1 className="text-2xl font-bold text-navy-900">Experiment Surfaces</h1>
           <p className="text-sm text-gray-500">Landing pages and other deployment surfaces for validation.</p>
         </div>
-        <Link
-          href={`/dashboard/${projectId}/concept`}
+        <button
+          onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-2 self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
         >
-          <Plus className="h-4 w-4" /> Create Surface
-        </Link>
+          {showForm ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {showForm ? "Cancel" : "Create Surface"}
+        </button>
       </div>
 
-      {landingPages.length === 0 && surfaces.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-white p-12 text-center">
-          <Globe className="mb-3 h-8 w-8 text-gray-300" />
-          <h3 className="text-sm font-semibold text-gray-700">No surfaces yet</h3>
-          <p className="mt-1 text-sm text-gray-500">Create a landing page linked to a persona, offer, and hypothesis.</p>
+      {showForm && (
+        <div className="rounded-lg border bg-white p-4 shadow-widget">
+          <h2 className="mb-3 text-sm font-semibold text-navy-900">New Landing Page</h2>
+          <LandingPageForm projectId={params.projectId} onSaved={() => { loadData(); setShowForm(false); }} />
         </div>
+      )}
+
+      {loading ? (
+        <div className="space-y-3">{[1, 2].map((i) => <div key={i} className="h-20 animate-pulse rounded-lg border bg-white p-4"><div className="h-4 w-3/4 rounded bg-gray-200" /><div className="mt-2 h-3 w-1/2 rounded bg-gray-100" /></div>)}</div>
+      ) : error ? (
+        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600"><AlertTriangle className="h-4 w-4 shrink-0" />{error}</div>
+      ) : landingPages.length === 0 && surfaces.length === 0 ? (
+        <EmptyState icon={Globe} title="No surfaces yet" description="Create a landing page linked to a persona, offer, and hypothesis." />
       ) : (
         <div className="space-y-4">
           {landingPages.length > 0 && (
@@ -56,7 +75,7 @@ export default async function SurfacesPage({
                 {landingPages.map((lp) => (
                   <Link
                     key={lp.id}
-                    href={`/dashboard/${projectId}/surfaces/${lp.id}`}
+                    href={`/dashboard/${params.projectId}/surfaces/${lp.id}`}
                     className="group rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all"
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -71,8 +90,8 @@ export default async function SurfacesPage({
                       <span className="capitalize">{lp.journeyStage}</span>
                     </div>
                     <div className="mt-1 flex gap-3 text-[10px] text-gray-400">
-                      <span>{lp.ctas.length} CTAs</span>
-                      <span>{lp.contentBlocks.length} blocks</span>
+                      <span>{lp.ctas?.length || 0} CTAs</span>
+                      <span>{lp.contentBlocks?.length || 0} blocks</span>
                     </div>
                   </Link>
                 ))}
@@ -87,7 +106,7 @@ export default async function SurfacesPage({
                 {surfaces.map((s) => (
                   <div key={s.id} className="rounded-lg border bg-white p-3 shadow-sm">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-navy-900 capitalize">{s.surfaceType.replace(/_/g, " ")}</span>
+                      <span className="text-sm font-medium text-navy-900 capitalize">{s.surfaceType?.replace(/_/g, " ")}</span>
                       <StatusBadge status={s.status} />
                     </div>
                   </div>

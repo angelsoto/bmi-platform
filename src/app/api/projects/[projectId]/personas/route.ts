@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createPersonaSchema } from "@/lib/bmi/schemas/project";
 
 export async function GET(
   req: Request,
@@ -28,15 +30,18 @@ export async function POST(
     const { projectId } = await params;
     const { userId } = await authorizeProject(projectId);
     const body = await req.json();
+    const result = validateBody(createPersonaSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const persona = await prisma.persona.create({
       data: {
         projectId,
-        name: body.name,
-        description: body.description,
-        primaryPain: body.primaryPain,
-        context: body.context,
-        relatedHypothesisIds: JSON.stringify(body.relatedHypothesisIds || []),
+        name: d.name,
+        description: d.description,
+        primaryPain: d.primaryPain,
+        context: d.context,
+        relatedHypothesisIds: "[]",
         createdByUserId: userId,
       },
     });

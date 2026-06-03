@@ -13,6 +13,7 @@ import {
   Shield,
   Users,
   Gift,
+  BarChart3,
   ChevronDown,
   X,
   Menu,
@@ -25,6 +26,7 @@ const navItems = [
   { key: "evidence", label: "Evidence & Bias", icon: Shield },
   { key: "experiments", label: "Experiments", icon: FlaskConical },
   { key: "surfaces", label: "Surfaces", icon: Gift },
+  { key: "analytics", label: "Analytics", icon: BarChart3 },
   { key: "pmf", label: "PMF Readiness", icon: Gauge },
   { key: "loops", label: "Learning Loops", icon: RefreshCw },
 ];

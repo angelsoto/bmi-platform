@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createLandingPageSchema } from "@/lib/bmi/schemas/more";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -22,16 +24,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
     const { projectId } = await params;
     const { userId } = await authorizeProject(projectId, "owner");
     const body = await req.json();
+    const result = validateBody(createLandingPageSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const page = await prisma.landingPage.create({
       data: {
         projectId,
-        name: body.name,
-        slug: body.slug,
-        personaId: body.personaId,
-        offerId: body.offerId,
-        hypothesisId: body.hypothesisId,
-        journeyStage: body.journeyStage || "awareness",
+        name: d.name,
+        slug: d.slug,
+        personaId: d.personaId || "",
+        offerId: d.offerId || "",
+        hypothesisId: d.hypothesisId || "",
+        journeyStage: d.journeyStage,
       },
     });
     return NextResponse.json(page, { status: 201 });

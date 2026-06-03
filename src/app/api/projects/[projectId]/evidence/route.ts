@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createEvidenceSchema } from "@/lib/bmi/schemas/evidence";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -22,14 +24,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
     const { projectId } = await params;
     const { userId } = await authorizeProject(projectId);
     const body = await req.json();
+    const result = validateBody(createEvidenceSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
+
     const item = await prisma.evidenceItem.create({
       data: {
         projectId,
-        sourceType: body.sourceType || "manual_note",
-        summary: body.summary,
-        rawText: body.rawText,
-        relatedHypothesisId: body.relatedHypothesisId,
-        relatedExperimentId: body.relatedExperimentId,
+        sourceType: d.sourceType,
+        summary: d.summary,
+        rawText: d.rawText,
+        relatedHypothesisId: d.relatedHypothesisId,
+        relatedExperimentId: d.relatedExperimentId,
         collectedByUserId: userId,
         collectedAt: new Date(),
       },

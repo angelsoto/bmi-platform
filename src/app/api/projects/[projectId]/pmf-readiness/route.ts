@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
 import { computePmfScore, computeEvidenceDistortionCoefficient, computeValidationCoverage, resolveReadinessState } from "@/lib/bmi/formulas";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createPMFReadinessSchema } from "@/lib/bmi/schemas/more";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -21,6 +23,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
     const { projectId } = await params;
     await authorizeProject(projectId);
     const body = await req.json();
+    const result = validateBody(createPMFReadinessSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     // Compute from current data
     const highRiskHyps = await prisma.hypothesis.findMany({
@@ -37,13 +42,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
     const distortion = computeEvidenceDistortionCoefficient(allFlags.map((f) => ({ severity: f.severity as "low" | "medium" | "high" })), reviews.length);
 
     const coverage = computeValidationCoverage(totalHighRisk, validated);
-    const pmfScore = computePmfScore(coverage, body.customerDisappointmentScore ?? null, distortion);
+    const pmfScore = computePmfScore(coverage, d.customerDisappointmentScore ?? null, distortion);
     const readinessState = resolveReadinessState(pmfScore, coverage, invalidated > 0);
 
     const assessment = await prisma.pMFReadinessAssessment.create({
       data: {
         projectId,
-        customerDisappointmentScore: body.customerDisappointmentScore,
+        customerDisappointmentScore: d.customerDisappointmentScore,
         totalHighRiskHypotheses: totalHighRisk,
         unvalidatedHighRiskHypotheses: invalidated,
         evidenceDistortionCoefficient: distortion,

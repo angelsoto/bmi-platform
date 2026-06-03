@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
-import { getAIProvider } from "@/lib/ai/client";
+import { getAIProvider, getLastAIResult } from "@/lib/ai/client";
 
 export async function POST(req: Request, { params }: { params: Promise<{ evidenceId: string }> }) {
   try {
@@ -34,13 +34,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ evidenc
 
     await prisma.evidenceItem.update({ where: { id: evidenceId }, data: { evidenceStrength: review.adjustedEvidenceStrength } });
     // Log AI call
+    const aiResult = getLastAIResult();
     await prisma.aILog.create({
       data: {
         projectId: evidence.projectId,
         userId,
         functionType: "evidence_quality_review",
         inputSummary: (evidence.rawText || evidence.summary).substring(0, 200),
-        model: "mock",
+        model: aiResult?.model || "mock",
+        tokenUsage: aiResult?.tokenUsage ? JSON.stringify(aiResult.tokenUsage) : undefined,
+        latency: aiResult?.latency,
         outputEntityType: "evidence_quality_review",
         outputEntityId: qualityReview.id,
       },

@@ -17,7 +17,7 @@
  */
 
 import { prisma } from "@/lib/db/prisma";
-import { getAIProvider } from "@/lib/ai/client";
+import { getAIProvider, getLastAIResult } from "@/lib/ai/client";
 import {
   computeEvidenceStrength,
   computePmfScore,
@@ -113,15 +113,18 @@ export async function runExperimentResultChain(input: ChainInput): Promise<Chain
       },
     });
 
-    
+
     // Log AI call
+    const aiResult = getLastAIResult();
     await tx.aILog.create({
       data: {
         projectId: input.projectId,
         userId: input.userId,
         functionType: "experiment_result_chain",
         inputSummary: evidenceText.substring(0, 200),
-        model: "mock",
+        model: aiResult?.model || "mock",
+        tokenUsage: aiResult?.tokenUsage ? JSON.stringify(aiResult.tokenUsage) : undefined,
+        latency: aiResult?.latency,
         outputEntityType: "evidence_quality_review",
         outputEntityId: qualityReview.id,
       },

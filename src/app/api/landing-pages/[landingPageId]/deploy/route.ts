@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { deployLandingPageSchema } from "@/lib/bmi/schemas/more";
 
 export async function POST(req: Request, { params }: { params: Promise<{ landingPageId: string }> }) {
   try {
     const { landingPageId } = await params;
     const { userId } = await requireAuth();
+    const body = await req.json();
+    const result = validateBody(deployLandingPageSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
 
     const page = await prisma.landingPage.findUnique({ where: { id: landingPageId } });
     if (!page) return NextResponse.json({ error: "Landing page not found" }, { status: 404 });

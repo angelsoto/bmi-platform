@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createExperimentSchema } from "@/lib/bmi/schemas/experiments";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -22,15 +24,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
     const { projectId } = await params;
     const { userId } = await authorizeProject(projectId);
     const body = await req.json();
+    const result = validateBody(createExperimentSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const experiment = await prisma.experiment.create({
       data: {
         projectId,
-        hypothesisId: body.hypothesisId,
-        name: body.name,
-        description: body.description,
-        experimentType: body.experimentType || "manual_validation",
-        ownerUserId: body.ownerUserId || userId,
+        hypothesisId: d.hypothesisId,
+        name: d.name,
+        description: d.description,
+        experimentType: d.experimentType,
+        ownerUserId: d.ownerUserId || userId,
       },
     });
     return NextResponse.json(experiment, { status: 201 });

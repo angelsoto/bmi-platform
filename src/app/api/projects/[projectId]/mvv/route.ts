@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { upsertMVVSchema } from "@/lib/bmi/schemas/more";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -18,28 +20,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
     const { projectId } = await params;
     const { userId } = await authorizeProject(projectId);
     const body = await req.json();
-
-    if (!body.mission || !body.vision) {
-      return NextResponse.json({ error: "Mission and vision are required" }, { status: 400 });
-    }
+    const result = validateBody(upsertMVVSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const mvv = await prisma.mVVStatement.upsert({
       where: { projectId },
       update: {
-        mission: body.mission,
-        vision: body.vision,
-        values: JSON.stringify(body.values || []),
-        founderAssumptions: JSON.stringify(body.founderAssumptions || []),
-        unresolvedTensions: JSON.stringify(body.unresolvedTensions || []),
+        mission: d.mission,
+        vision: d.vision,
+        values: JSON.stringify(d.values || []),
+        founderAssumptions: JSON.stringify(d.founderAssumptions || []),
+        unresolvedTensions: JSON.stringify(d.unresolvedTensions || []),
         versionNumber: { increment: 1 },
       },
       create: {
         projectId,
-        mission: body.mission,
-        vision: body.vision,
-        values: JSON.stringify(body.values || []),
-        founderAssumptions: JSON.stringify(body.founderAssumptions || []),
-        unresolvedTensions: JSON.stringify(body.unresolvedTensions || []),
+        mission: d.mission,
+        vision: d.vision,
+        values: JSON.stringify(d.values || []),
+        founderAssumptions: JSON.stringify(d.founderAssumptions || []),
+        unresolvedTensions: JSON.stringify(d.unresolvedTensions || []),
         createdByUserId: userId,
       },
     });

@@ -82,6 +82,9 @@
 
   /* Focus */
   --color-focus: #123FD3;
+
+  /* 12-column grid (§7 visual guidelines) */
+  --grid-template-columns-12: repeat(12, minmax(0, 1fr));
 }
 
 body {

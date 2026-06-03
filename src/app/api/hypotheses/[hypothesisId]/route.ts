@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { updateHypothesisSchema } from "@/lib/bmi/schemas/hypotheses";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ hypothesisId: string }> }) {
   try {
     const { hypothesisId } = await params;
     const { userId } = await requireAuth();
     const body = await req.json();
+    const result = validateBody(updateHypothesisSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const existing = await prisma.hypothesis.findUnique({ where: { id: hypothesisId } });
     if (!existing) return NextResponse.json({ error: "Hypothesis not found" }, { status: 404 });
@@ -20,17 +25,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ hypoth
         statement: existing.statement,
         confidence: existing.confidence,
         evidenceStrength: existing.evidenceStrength,
-        changedReason: body.changedReason || "Updated",
+        changedReason: d.changedReason || "Updated",
         changedByUserId: userId,
       },
     });
 
+    const { changedReason, ...updateFields } = d;
     const updated = await prisma.hypothesis.update({
       where: { id: hypothesisId },
       data: {
-        ...body,
+        ...updateFields,
         currentVersionNumber: { increment: 1 },
-        changedReason: undefined,
       },
     });
 

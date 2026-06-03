@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { acceptIntakeSchema } from "@/lib/bmi/schemas/more";
 
 export async function POST(
   req: Request,
@@ -17,14 +19,16 @@ export async function POST(
     if (intake.userId !== userId) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
     const body = await req.json();
-    const { hypotheses, acceptPersona, acceptOffer, persona, offer } = body;
+    const result = validateBody(acceptIntakeSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
-    const result = await prisma.$transaction(async (tx) => {
+    const created = await prisma.$transaction(async (tx) => {
       const created: any = { hypotheses: [], persona: null, offer: null };
 
       // Create selected hypotheses
-      if (hypotheses && Array.isArray(hypotheses)) {
-        for (const h of hypotheses) {
+      if (d.hypotheses) {
+        for (const h of d.hypotheses) {
           const hypothesis = await tx.hypothesis.create({
             data: {
               projectId: intake.projectId,
@@ -49,12 +53,12 @@ export async function POST(
       }
 
       // Create persona if accepted
-      if (acceptPersona && persona) {
+      if (d.acceptPersona && d.persona) {
         created.persona = await tx.persona.create({
           data: {
             projectId: intake.projectId,
-            name: persona.name,
-            primaryPain: persona.primaryPain,
+            name: d.persona.name,
+            primaryPain: d.persona.primaryPain,
             description: `AI-generated from concept intake`,
             relatedHypothesisIds: JSON.stringify(created.hypotheses.map((h: any) => h.id)),
             createdByUserId: userId,
@@ -63,12 +67,12 @@ export async function POST(
       }
 
       // Create offer if accepted
-      if (acceptOffer && offer) {
+      if (d.acceptOffer && d.offer) {
         created.offer = await tx.offer.create({
           data: {
             projectId: intake.projectId,
-            name: offer.name,
-            valueProposition: offer.valueProposition,
+            name: d.offer.name,
+            valueProposition: d.offer.valueProposition,
             format: "service",
             relatedHypothesisIds: JSON.stringify(created.hypotheses.map((h: any) => h.id)),
             createdByUserId: userId,
@@ -79,7 +83,7 @@ export async function POST(
       return created;
     });
 
-    return NextResponse.json({ success: true, ...result }, { status: 201 });
+    return NextResponse.json({ success: true, ...created }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: error.status || 500 });
   }
