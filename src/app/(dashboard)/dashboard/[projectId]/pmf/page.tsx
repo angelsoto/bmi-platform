@@ -44,6 +44,10 @@ export default async function PMFPage({
           <Gauge className="mb-3 h-8 w-8 text-gray-300" />
           <h3 className="text-sm font-semibold text-gray-700">No PMF assessment yet</h3>
           <p className="mt-1 text-sm text-gray-500">Run experiments and collect evidence to generate your first assessment.</p>
+          <Link href={`/dashboard/${projectId}/concept`}
+            className="mt-4 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+            Start with Concept Intake
+          </Link>
         </div>
       ) : (
         <div className="space-y-6">

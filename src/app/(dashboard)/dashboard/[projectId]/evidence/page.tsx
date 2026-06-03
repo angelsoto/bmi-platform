@@ -5,17 +5,30 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Shield, Flag, ChevronRight } from "lucide-react";
 
+const SOURCE_TYPES = ["interview", "survey", "experiment_result", "manual_note", "analytics"];
+const STRENGTH_LEVELS = ["weak", "moderate", "strong"];
+
 export default async function EvidencePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ projectId: string }>;
+  searchParams?: Promise<{ source?: string; strength?: string }>;
 }) {
   const { projectId } = await params;
+  const sp = await searchParams;
   const session = await auth();
   if (!session?.user) redirect("/auth/signin");
 
+  const sourceFilter = SOURCE_TYPES.includes(sp?.source as any) ? sp!.source : undefined;
+  const strengthFilter = STRENGTH_LEVELS.includes(sp?.strength as any) ? sp!.strength : undefined;
+
   const evidenceItems = await prisma.evidenceItem.findMany({
-    where: { projectId },
+    where: {
+      projectId,
+      ...(sourceFilter ? { sourceType: sourceFilter } : {}),
+      ...(strengthFilter ? { evidenceStrength: strengthFilter } : {}),
+    },
     include: { qualityReviews: { include: { biasFlags: true }, take: 1 }, hypothesis: { select: { title: true, id: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -27,11 +40,29 @@ export default async function EvidencePage({
         <p className="text-sm text-gray-500">Digital Devil&apos;s Advocate — evidence quality review and bias detection.</p>
       </div>
 
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Link href={`/dashboard/${projectId}/evidence`}
+          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            !sourceFilter && !strengthFilter ? "bg-navy-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}>All</Link>
+        {SOURCE_TYPES.map((s) => (
+          <Link key={s} href={`/dashboard/${projectId}/evidence?source=${s}`}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+              sourceFilter === s ? "bg-navy-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}>{s.replace(/_/g, " ")}</Link>
+        ))}
+      </div>
+
       {evidenceItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed bg-white p-12 text-center">
           <Shield className="mb-3 h-8 w-8 text-gray-300" />
           <h3 className="text-sm font-semibold text-gray-700">No evidence collected</h3>
           <p className="mt-1 text-sm text-gray-500">Evidence is auto-created when you record experiment results.</p>
+          <Link href={`/dashboard/${projectId}/experiments`}
+            className="mt-4 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+            View Active Experiments
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">
@@ -54,6 +85,11 @@ export default async function EvidencePage({
                       )}
                     </div>
                     <p className="mt-2 text-sm text-gray-900 line-clamp-2">{item.summary}</p>
+                    {item.collectedAt && (
+                      <p className="mt-1 text-[10px] text-gray-400">
+                        Collected {new Date(item.collectedAt).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex shrink-0 items-center gap-2">

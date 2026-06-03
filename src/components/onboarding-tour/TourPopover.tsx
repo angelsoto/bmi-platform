@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 
 interface TourStep {
   id: string;
@@ -13,6 +13,14 @@ interface TourStep {
   actionType: string;
 }
 
+interface UserState {
+  hasSeenMainTour?: boolean;
+  currentTourStep?: string | null;
+  skippedMainTourAt?: string | null;
+  mainTourCompletedAt?: string | null;
+  completedStepIds?: string;
+}
+
 interface TourPopoverProps {
   projectId?: string;
 }
@@ -22,8 +30,19 @@ export function TourPopover({ projectId }: TourPopoverProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userState, setUserState] = useState<UserState | null>(null);
   const [position, setPosition] = useState({ top: 120, left: 0 });
   const [anchorRight, setAnchorRight] = useState(true);
+
+  const patchState = useCallback(async (patch: Partial<UserState>) => {
+    try {
+      await fetch("/api/users/me/onboarding", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+    } catch {}
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -31,17 +50,32 @@ export function TourPopover({ projectId }: TourPopoverProps) {
         const res = await fetch("/api/users/me/onboarding");
         if (!res.ok) return;
         const data = await res.json();
-        if (data.state?.hasSeenMainTour || data.state?.skippedMainTourAt) {
-          setVisible(false); setLoading(false); return;
+        setUserState(data.state);
+
+        // Resume from saved step if tour was partially completed
+        if (data.state?.currentTourStep && !data.state?.hasSeenMainTour) {
+          const savedIndex = (data.tourSteps || []).findIndex(
+            (s: TourStep) => s.key === data.state.currentTourStep
+          );
+          if (savedIndex >= 0) setCurrentIndex(savedIndex);
         }
+
+        if (data.state?.hasSeenMainTour || data.state?.skippedMainTourAt) {
+          setVisible(false);
+          setLoading(false);
+          return;
+        }
+
         setSteps(data.tourSteps || []);
         if ((data.tourSteps || []).length > 0) setVisible(true);
-      } catch {} finally { setLoading(false); }
+      } catch {
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
 
-  // Position the tour panel near the target element (centered on mobile)
   const reposition = useCallback(() => {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
@@ -82,34 +116,71 @@ export function TourPopover({ projectId }: TourPopoverProps) {
   }, [reposition]);
 
   const completeTour = useCallback(async () => {
-    await fetch("/api/users/me/onboarding", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hasSeenMainTour: true, mainTourCompletedAt: new Date().toISOString() }),
+    await patchState({
+      hasSeenMainTour: true,
+      mainTourCompletedAt: new Date().toISOString(),
+      currentTourStep: null,
     });
     setVisible(false);
-  }, []);
+  }, [patchState]);
 
   const skipTour = useCallback(async () => {
-    await fetch("/api/users/me/onboarding", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hasSeenMainTour: true, skippedMainTourAt: new Date().toISOString() }),
+    await patchState({
+      hasSeenMainTour: true,
+      skippedMainTourAt: new Date().toISOString(),
+      currentTourStep: null,
     });
     setVisible(false);
-  }, []);
+  }, [patchState]);
 
-  if (loading || !visible || steps.length === 0) return null;
+  const restartTour = useCallback(async () => {
+    await patchState({
+      hasSeenMainTour: false,
+      currentTourStep: null,
+      skippedMainTourAt: null,
+      mainTourCompletedAt: null,
+      completedStepIds: "[]",
+    });
+    setCurrentIndex(0);
+    setVisible(true);
+    setTimeout(reposition, 50);
+  }, [patchState, reposition]);
+
+  if (loading) return null;
+
+  // Show restart button if tour is completed
+  if (!visible && userState?.hasSeenMainTour) {
+    return (
+      <div className="flex justify-end">
+        <button
+          onClick={restartTour}
+          className="flex items-center gap-1 text-xs text-gray-400 hover:text-navy-700 transition-colors"
+          title="Restart the onboarding tour"
+        >
+          <RotateCcw className="h-3 w-3" />
+          Tour
+        </button>
+      </div>
+    );
+  }
+
+  if (!visible || steps.length === 0) return null;
 
   const currentStep = steps[currentIndex];
   if (!currentStep) return null;
 
   const isLast = currentIndex === steps.length - 1;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isLast) { completeTour(); return; }
+    const nextStep = steps[currentIndex + 1];
+    const completedIds = JSON.parse(userState?.completedStepIds || "[]");
+    completedIds.push(currentStep.key);
+    await patchState({
+      currentTourStep: nextStep?.key || null,
+      completedStepIds: JSON.stringify(completedIds),
+    });
     setCurrentIndex(currentIndex + 1);
-    // Reposition after render
     setTimeout(reposition, 50);
   };
 
@@ -121,14 +192,12 @@ export function TourPopover({ projectId }: TourPopoverProps) {
 
   return (
     <>
-      {/* Overlay highlight around target — desktop only */}
       {currentStep.targetSelector && (
         <div className="hidden md:block">
           <TargetHighlight selector={currentStep.targetSelector} />
         </div>
       )}
 
-      {/* Tour panel — anchored or centered on mobile */}
       <div
         className="fixed z-[100] transition-all duration-300 ease-out"
         style={{
@@ -139,12 +208,10 @@ export function TourPopover({ projectId }: TourPopoverProps) {
         }}
       >
         <div className="rounded-xl border-2 border-navy-900 bg-white p-4 md:p-5 shadow-xl">
-          {/* Arrow pointing to target — hidden on mobile */}
           <div className={`hidden md:block absolute top-4 w-3 h-3 rotate-45 border-l border-t bg-white border-navy-900 ${
             anchorRight ? "-left-[7px]" : "left-4 -top-[7px]"
           }`} />
 
-          {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-navy-900 text-xs font-bold text-white">
@@ -159,14 +226,17 @@ export function TourPopover({ projectId }: TourPopoverProps) {
 
           <p className="text-sm text-gray-600 leading-relaxed">{currentStep.body}</p>
 
-          {/* Progress dots */}
           <div className="mt-4 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               {steps.map((_, i) => (
-                <div key={i} className={`h-1.5 rounded-full transition-all ${
-                  i === currentIndex ? "w-5 bg-navy-900" :
-                  i < currentIndex ? "w-1.5 bg-navy-300" : "w-1.5 bg-gray-200"
-                }`} />
+                <div
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === currentIndex ? "w-5 bg-navy-900" :
+                    i < currentIndex ? "w-1.5 bg-navy-300" :
+                    "w-1.5 bg-gray-200"
+                  }`}
+                />
               ))}
             </div>
 
@@ -193,7 +263,6 @@ export function TourPopover({ projectId }: TourPopoverProps) {
   );
 }
 
-/** Highlights the target element with a pulsing ring */
 function TargetHighlight({ selector }: { selector: string }) {
   const [rect, setRect] = useState<DOMRect | null>(null);
 

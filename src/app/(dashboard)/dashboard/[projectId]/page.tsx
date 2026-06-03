@@ -275,6 +275,23 @@ export default async function ProjectDetailPage({
         </div>
       )}
 
+      {/* Onboarding suggestion when no hypotheses exist */}
+      {project._count.hypotheses === 0 && (
+        <div className="rounded-lg border-2 border-dashed border-indigo-200 bg-indigo-50 p-5 text-center">
+          <Lightbulb className="mx-auto mb-2 h-6 w-6 text-indigo-400" />
+          <h3 className="text-sm font-semibold text-indigo-700">Ready to start validating?</h3>
+          <p className="mt-1 text-sm text-indigo-600">
+            Run a concept intake with your business idea to generate structured assumptions, hypotheses, and a draft persona and offer.
+          </p>
+          <Link
+            href={`/dashboard/${projectId}/concept`}
+            className="mt-3 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            <Lightbulb className="h-4 w-4" /> Start Concept Intake
+          </Link>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4" data-tour="validation-spine">
         {[
           { icon: Target, count: project._count.hypotheses, label: "Hypotheses", color: "text-navy-500" },

@@ -5,17 +5,24 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { FlaskConical, ChevronRight, Plus } from "lucide-react";
 
+const STATUS_FILTERS = ["running", "analyzing", "decision_made", "applied"];
+
 export default async function ExperimentsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ projectId: string }>;
+  searchParams?: Promise<{ status?: string }>;
 }) {
   const { projectId } = await params;
+  const sp = await searchParams;
   const session = await auth();
   if (!session?.user) redirect("/auth/signin");
 
+  const statusFilter = STATUS_FILTERS.includes(sp?.status as any) ? sp!.status : undefined;
+
   const experiments = await prisma.experiment.findMany({
-    where: { projectId },
+    where: { projectId, ...(statusFilter ? { status: statusFilter } : {}) },
     include: { hypothesis: { select: { title: true, id: true } }, results: { orderBy: { createdAt: "desc" }, take: 1 } },
     orderBy: { updatedAt: "desc" },
   });
@@ -27,12 +34,23 @@ export default async function ExperimentsPage({
           <h1 className="text-2xl font-bold text-navy-900">Experiments</h1>
           <p className="text-sm text-gray-500">Every experiment needs a metric, threshold, and decision rule.</p>
         </div>
-        <Link
-          href={`/dashboard/${projectId}/hypotheses`}
-          className="flex items-center gap-2 self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
+        <Link href={`/dashboard/${projectId}/hypotheses`}
+          className="flex items-center gap-2 self-start rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
           <Plus className="h-4 w-4" /> Create from Hypothesis
         </Link>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Link href={`/dashboard/${projectId}/experiments`}
+          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            !statusFilter ? "bg-navy-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}>All</Link>
+        {STATUS_FILTERS.map((s) => (
+          <Link key={s} href={`/dashboard/${projectId}/experiments?status=${s}`}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+              statusFilter === s ? "bg-navy-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}>{s.replace(/_/g, " ")}</Link>
+        ))}
       </div>
 
       {experiments.length === 0 ? (
@@ -40,17 +58,21 @@ export default async function ExperimentsPage({
           <FlaskConical className="mb-3 h-8 w-8 text-gray-300" />
           <h3 className="text-sm font-semibold text-gray-700">No experiments yet</h3>
           <p className="mt-1 text-sm text-gray-500">Design an experiment from your highest-risk hypothesis.</p>
+          <Link href={`/dashboard/${projectId}/hypotheses`}
+            className="mt-4 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+            View Riskiest Hypotheses
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">
           {experiments.map((exp) => {
             const lastResult = exp.results[0];
+            const duration = exp.startDate && exp.endDate
+              ? `${Math.round((exp.endDate.getTime() - exp.startDate.getTime()) / (1000 * 60 * 60 * 24))}d`
+              : null;
             return (
-              <Link
-                key={exp.id}
-                href={`/dashboard/${projectId}/experiments/${exp.id}`}
-                className="group block rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all"
-              >
+              <Link key={exp.id} href={`/dashboard/${projectId}/experiments/${exp.id}`}
+                className="group block rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -64,25 +86,23 @@ export default async function ExperimentsPage({
                       <p className="mt-1 text-xs text-gray-400">
                         Testing: &ldquo;
                         <Link href={`/dashboard/${projectId}/hypotheses/${exp.hypothesis.id}`}
-                          className="text-indigo-600 hover:text-indigo-800 hover:underline"
-                        >{exp.hypothesis.title}</Link>
-                        &rdquo;
+                          className="text-indigo-600 hover:text-indigo-800 hover:underline">
+                          {exp.hypothesis.title}
+                        </Link>&rdquo;
                       </p>
                     )}
                   </div>
                   <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-gray-300 group-hover:text-navy-500" />
                 </div>
-
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
                   <span className="font-medium text-navy-700">{exp.experimentType.replace(/_/g, " ")}</span>
-                  {exp.startDate && (
-                    <span>Started: {exp.startDate.toLocaleDateString()}</span>
-                  )}
+                  {exp.startDate && <span>Started: {exp.startDate.toLocaleDateString()}</span>}
+                  {duration && <span>Duration: {duration}</span>}
+                  {exp.endDate && <span>Ended: {exp.endDate.toLocaleDateString()}</span>}
                   {lastResult && (
                     <span className={`font-medium ${
                       lastResult.decisionRuleOutcome === "supports" ? "text-green-600" :
-                      lastResult.decisionRuleOutcome === "weakens" ? "text-red-600" :
-                      "text-amber-600"
+                      lastResult.decisionRuleOutcome === "weakens" ? "text-red-600" : "text-amber-600"
                     }`}>
                       Result: {lastResult.decisionRuleOutcome} ({lastResult.observedValue})
                     </span>
