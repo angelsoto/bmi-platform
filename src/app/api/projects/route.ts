@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
+import { validateBody } from "@/lib/bmi/schemas/validate";
+import { createProjectSchema } from "@/lib/bmi/schemas/project";
 
 export async function GET() {
   try {
@@ -23,20 +25,18 @@ export async function POST(req: Request) {
   try {
     const { userId } = await requireAuth();
     const body = await req.json();
-    const { name, description, businessType, currentStage, primaryGoal } = body;
-
-    if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
-    }
+    const result = validateBody(createProjectSchema, body);
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+    const d = result.data!;
 
     const project = await prisma.$transaction(async (tx) => {
       const project = await tx.project.create({
         data: {
-          name,
-          description,
-          businessType: businessType || "startup",
-          currentStage: currentStage || "idea",
-          primaryGoal,
+          name: d.name,
+          description: d.description,
+          businessType: d.businessType,
+          currentStage: d.currentStage,
+          primaryGoal: d.primaryGoal,
           ownerId: userId,
           proofCaseMode: false,
         },
