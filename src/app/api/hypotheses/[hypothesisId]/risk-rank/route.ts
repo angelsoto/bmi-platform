@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth/authorize";
 import { computeValidationPriorityScore } from "@/lib/bmi/formulas";
 import { validateBody } from "@/lib/bmi/schemas/validate";
 import { rankHypothesisSchema } from "@/lib/bmi/schemas/hypotheses";
+import { getAIProvider, getLastAIResult } from "@/lib/ai/client";
 
 export async function POST(req: Request, { params }: { params: Promise<{ hypothesisId: string }> }) {
   try {
@@ -19,6 +20,39 @@ export async function POST(req: Request, { params }: { params: Promise<{ hypothe
 
     const score = computeValidationPriorityScore(d.survivalCriticality, d.uncertainty);
 
+    // Enrich with AI rationale (non-blocking)
+    let aiRationale: string | null = null;
+    try {
+      const ai = getAIProvider();
+      const rankings = await ai.rankHypotheses([{
+        id: hypothesisId,
+        title: hypothesis.title,
+        statement: hypothesis.statement,
+        type: hypothesis.type || "desirability",
+      }]);
+      if (rankings?.[0]?.rationale) {
+        aiRationale = rankings[0].rationale;
+        const aiResult = getLastAIResult();
+        if (aiResult) {
+          await prisma.aILog.create({
+            data: {
+              projectId: hypothesis.projectId,
+              userId,
+              functionType: "hypothesis_ranking",
+              inputSummary: hypothesis.statement.substring(0, 200),
+              model: aiResult.model,
+              tokenUsage: JSON.stringify(aiResult.tokenUsage),
+              latency: aiResult.latency,
+              outputEntityType: "hypothesis_risk_rank",
+              outputEntityId: hypothesisId,
+            },
+          });
+        }
+      }
+    } catch {
+      // AI enrichment is non-blocking
+    }
+
     const rank = await prisma.hypothesisRiskRank.create({
       data: {
         hypothesisId,
@@ -26,7 +60,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ hypothe
         survivalCriticality: d.survivalCriticality,
         uncertainty: d.uncertainty,
         validationPriorityScore: score,
-        rationale: d.rationale,
+        rationale: aiRationale || d.rationale,
       },
     });
 

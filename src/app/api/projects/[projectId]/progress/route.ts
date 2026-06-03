@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { authorizeProject } from "@/lib/auth/authorize";
+import { authorizeProject, requireAuth } from "@/lib/auth/authorize";
 import { validateBody } from "@/lib/bmi/schemas/validate";
 import { createProgressTrackSchema } from "@/lib/bmi/schemas/more";
+import { getAIProvider, getLastAIResult } from "@/lib/ai/client";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -38,7 +39,36 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
         currentFocus: d.currentFocus,
       },
     });
-    return NextResponse.json(item, { status: 201 });
+
+    // Enrich with AI operating brief (non-blocking)
+    let aiBrief: Record<string, unknown> | null = null;
+    try {
+      const projectContext = `Project progress track: ${d.name} (${d.type}), health: ${d.health}, focus: ${d.currentFocus || "N/A"}, score: ${d.completionScore ?? 0}`;
+      const ai = getAIProvider();
+      const brief = await ai.generateOperatingBrief(projectContext);
+      aiBrief = brief as unknown as Record<string, unknown>;
+      const aiResult = getLastAIResult();
+      if (aiResult) {
+        const { userId } = await requireAuth();
+        await prisma.aILog.create({
+          data: {
+            projectId,
+            userId,
+            functionType: "operating_brief",
+            inputSummary: projectContext.substring(0, 200),
+            model: aiResult.model,
+            tokenUsage: JSON.stringify(aiResult.tokenUsage),
+            latency: aiResult.latency,
+            outputEntityType: "progress_track",
+            outputEntityId: item.id,
+          },
+        });
+      }
+    } catch {
+      // AI enrichment is non-blocking
+    }
+
+    return NextResponse.json({ ...item, aiBrief }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: error.status || 500 });
   }

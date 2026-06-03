@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { authorizeProject } from "@/lib/auth/authorize";
 import { validateBody } from "@/lib/bmi/schemas/validate";
 import { createLandingPageSchema } from "@/lib/bmi/schemas/more";
+import { getAIProvider, getLastAIResult } from "@/lib/ai/client";
 
 export async function GET(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
   try {
@@ -39,7 +40,48 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
         journeyStage: d.journeyStage,
       },
     });
-    return NextResponse.json(page, { status: 201 });
+
+    // Enrich with AI-generated copy (non-blocking)
+    let aiCopy: Record<string, unknown> | null = null;
+    try {
+      let personaName = "your target customer";
+      let primaryPain = "their core challenge";
+      let offerName = d.name;
+      let valueProposition = "evidence-based validation";
+
+      if (d.personaId) {
+        const persona = await prisma.persona.findUnique({ where: { id: d.personaId }, select: { name: true, primaryPain: true } });
+        if (persona) { personaName = persona.name; primaryPain = persona.primaryPain; }
+      }
+      if (d.offerId) {
+        const offer = await prisma.offer.findUnique({ where: { id: d.offerId }, select: { name: true, valueProposition: true } });
+        if (offer) { offerName = offer.name; valueProposition = offer.valueProposition; }
+      }
+
+      const ai = getAIProvider();
+      const copy = await ai.generateLandingPageCopy({ personaName, primaryPain, offerName, valueProposition });
+      aiCopy = copy as unknown as Record<string, unknown>;
+      const aiResult = getLastAIResult();
+      if (aiResult) {
+        await prisma.aILog.create({
+          data: {
+            projectId,
+            userId,
+            functionType: "landing_page_copy",
+            inputSummary: `${offerName}: ${valueProposition}`.substring(0, 200),
+            model: aiResult.model,
+            tokenUsage: JSON.stringify(aiResult.tokenUsage),
+            latency: aiResult.latency,
+            outputEntityType: "landing_page",
+            outputEntityId: page.id,
+          },
+        });
+      }
+    } catch {
+      // AI enrichment is non-blocking
+    }
+
+    return NextResponse.json({ ...page, aiCopy }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: error.status || 500 });
   }
