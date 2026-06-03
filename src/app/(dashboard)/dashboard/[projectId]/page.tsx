@@ -97,7 +97,7 @@ export default async function ProjectDetailPage({
           ) : (
             <div className="space-y-2">
               {topHypotheses.map((h) => (
-                <Link key={h.id} href={`/dashboard/${projectId}/hypotheses`}
+                <Link key={h.id} href={`/dashboard/${projectId}/hypotheses/${h.id}`}
                   className="flex items-center justify-between rounded-md bg-gray-50 p-2 hover:bg-gray-100 transition-colors group">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
