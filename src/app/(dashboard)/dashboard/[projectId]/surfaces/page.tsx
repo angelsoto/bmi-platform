@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Globe, ChevronRight, Plus } from "lucide-react";
 
@@ -28,6 +29,7 @@ export default async function SurfacesPage({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
+          <Breadcrumbs items={[{ label: "Experiment Surfaces" }]} />
           <h1 className="text-2xl font-bold text-navy-900">Experiment Surfaces</h1>
           <p className="text-sm text-gray-500">Landing pages and other deployment surfaces for validation.</p>
         </div>

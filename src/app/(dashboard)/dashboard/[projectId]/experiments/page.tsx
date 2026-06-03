@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { FlaskConical, ChevronRight, Plus } from "lucide-react";
 
@@ -31,6 +32,7 @@ export default async function ExperimentsPage({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
+          <Breadcrumbs items={[{ label: "Experiments" }]} />
           <h1 className="text-2xl font-bold text-navy-900">Experiments</h1>
           <p className="text-sm text-gray-500">Every experiment needs a metric, threshold, and decision rule.</p>
         </div>

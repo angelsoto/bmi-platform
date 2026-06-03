@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Shield, Flag, ChevronRight } from "lucide-react";
 
@@ -36,7 +37,8 @@ export default async function EvidencePage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy-900">Evidence & Bias</h1>
+        <Breadcrumbs items={[{ label: "Evidence & Bias" }]} />
+          <h1 className="text-2xl font-bold text-navy-900">Evidence & Bias</h1>
         <p className="text-sm text-gray-500">Digital Devil&apos;s Advocate — evidence quality review and bias detection.</p>
       </div>
 

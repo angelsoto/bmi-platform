@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { Target, ChevronRight, Plus } from "lucide-react";
@@ -40,6 +41,7 @@ export default async function HypothesesPage({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
+          <Breadcrumbs items={[{ label: "Hypotheses" }]} />
           <h1 className="text-2xl font-bold text-navy-900">Hypotheses</h1>
           <p className="text-sm text-gray-500">Track your testable assumptions and their evidence.</p>
         </div>
@@ -99,7 +101,11 @@ export default async function HypothesesPage({
                 <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-gray-300 group-hover:text-navy-500" />
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
-                <span className="font-medium text-navy-700 capitalize">{h.type}</span>
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                  h.type === "desirability" ? "bg-red-100 text-red-700" :
+                  h.type === "viability" ? "bg-orange-100 text-orange-700" :
+                  "bg-teal-100 text-teal-700"
+                }`}>{h.type}</span>
                 {h.riskRanks[0] && (
                   <>
                     <span>Priority: <strong>{h.riskRanks[0].validationPriorityScore ?? "?"}</strong></span>

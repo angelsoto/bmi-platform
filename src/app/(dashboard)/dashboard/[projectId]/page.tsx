@@ -112,7 +112,12 @@ export default async function ProjectDetailPage({
                       <span className="truncate text-sm font-medium text-gray-900 group-hover:text-navy-700">{h.title}</span>
                       <StatusBadge status={h.evidenceStrength} />
                     </div>
-                    <span className="text-xs text-gray-500">{h.type} · Priority: {h.riskRanks[0]?.validationPriorityScore ?? "?"}</span>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium mr-2 ${
+                      h.type === "desirability" ? "bg-red-100 text-red-700" :
+                      h.type === "viability" ? "bg-orange-100 text-orange-700" :
+                      "bg-teal-100 text-teal-700"
+                    }`}>{h.type}</span>
+                    <span className="text-xs text-gray-500">Priority: {h.riskRanks[0]?.validationPriorityScore ?? "?"}</span>
                   </div>
                   <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-gray-300 group-hover:text-navy-500" />
                 </Link>

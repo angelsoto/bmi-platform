@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { RefreshCw, ChevronRight } from "lucide-react";
 
@@ -27,7 +28,8 @@ export default async function LoopsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy-900">Learning Loops</h1>
+        <Breadcrumbs items={[{ label: "Learning Loops" }]} />
+          <h1 className="text-2xl font-bold text-navy-900">Learning Loops</h1>
         <p className="text-sm text-gray-500">Outcome → Insight → Action → Measurement. Close the validation system.</p>
       </div>
 

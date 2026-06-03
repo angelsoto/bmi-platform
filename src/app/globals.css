@@ -1,10 +1,35 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #ffffff;
-  --color-foreground: #171717;
+  --color-background: #F6F8FB;
+  --color-foreground: #111827;
 
-  /* BMI Primary Navy */
+  /* Mango design tokens (§9-10) */
+  --color-bg-app: #F6F8FB;
+  --color-bg-surface: #FAFBFC;
+  --color-bg-panel: #FDFDFB;
+  --color-border: #E5E7EB;
+  --color-text-primary: #111827;
+  --color-text-secondary: #5F6877;
+  --color-text-muted: #8A94A6;
+  --color-brand-primary: #123FD3;
+  --color-brand-primary-hover: #0F32A8;
+
+  /* Risk colors */
+  --color-risk-high: #D94A4A;
+  --color-risk-medium: #D97706;
+  --color-risk-low: #059669;
+
+  /* Info / neutral */
+  --color-info: #2563EB;
+  --color-teal: #0D9488;
+
+  /* Hypothesis type colors (§17) */
+  --color-hyp-desirability: #D94A4A;
+  --color-hyp-viability: #D97706;
+  --color-hyp-feasibility: #0D9488;
+
+  /* BMI Primary Navy (keep for legacy components) */
   --color-navy-950: #072849;
   --color-navy-900: #0b406d;
   --color-navy-800: #064c83;
@@ -26,40 +51,42 @@
   --color-cyan-500: #06b6d4;
 
   /* Status */
-  --color-status-validated: #16a34a;
-  --color-status-invalidated: #dc2626;
-  --color-status-inconclusive: #ca8a04;
-  --color-status-untested: #6b7280;
-  --color-status-in-progress: #2563eb;
+  --color-status-validated: #059669;
+  --color-status-invalidated: #D94A4A;
+  --color-status-inconclusive: #D97706;
+  --color-status-untested: #8A94A6;
+  --color-status-in-progress: #2563EB;
   --color-status-draft: #9ca3af;
 
-  /* Risk */
-  --color-risk-critical: #7f1d1d;
-  --color-risk-high: #dc2626;
-  --color-risk-medium: #f59e0b;
-  --color-risk-low: #16a34a;
-
-  /* Evidence */
-  --color-evidence-strong: #16a34a;
-  --color-evidence-moderate: #2563eb;
-  --color-evidence-weak: #ca8a04;
-  --color-evidence-none: #6b7280;
+  /* Evidence strength */
+  --color-evidence-strong: #059669;
+  --color-evidence-moderate: #2563EB;
+  --color-evidence-weak: #D97706;
+  --color-evidence-none: #8A94A6;
 
   /* Fonts */
   --font-sans: "Inter", "system-ui", "sans-serif";
   --font-mono: "JetBrains Mono", "monospace";
 
   /* Border Radius */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
   --radius-widget: 0.75rem;
 
   /* Shadows */
-  --shadow-widget: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-popover: 0 16px 40px rgba(16, 24, 40, 0.18);
+  --shadow-widget: 0 1px 2px rgba(16, 24, 40, 0.06);
   --shadow-engine: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+  /* Focus */
+  --color-focus: #123FD3;
 }
 
 body {
-  background: var(--color-blueprint-50);
-  color: var(--color-foreground);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
 }
 
@@ -96,16 +123,35 @@ body {
 
 /* Deferred Feature Treatment */
 .deferred-feature {
-  border: 2px dashed var(--color-status-untested);
+  border: 2px dashed var(--color-evidence-none);
   border-radius: var(--radius-widget);
   opacity: 0.6;
 }
 
 /* Focus Ring */
+.focus-visible-ring:focus-visible,
 *:focus-visible {
-  outline: 2px solid var(--color-cyan-400);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Skip link - visible on focus only */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 8px;
+  z-index: 200;
+  padding: 8px 16px;
+  background: white;
+  color: var(--color-text-primary);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-popover);
+}
+.skip-link:focus {
+  top: 8px;
 }
 
 /* Gauge animation */
@@ -113,7 +159,14 @@ body {
   from { width: 0%; }
   to { width: var(--gauge-value, 0%); }
 }
-
 .animate-gauge-fill {
   animation: gauge-fill 0.8s ease-out forwards;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

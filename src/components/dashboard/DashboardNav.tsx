@@ -122,7 +122,8 @@ export function DashboardNav() {
       {/* Navigation Items */}
       <div className="flex-1 overflow-y-auto p-3">
         <Link href="/dashboard"
-          className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${pathname === "/dashboard" ? "bg-navy-900 text-white" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}>
+          className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${pathname === "/dashboard" ? "bg-navy-900 text-white" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}
+          {...(pathname === "/dashboard" ? { "aria-current": "page" as const } : {})}>
           <LayoutDashboard className="h-4 w-4 shrink-0" />
           Command Center
         </Link>
@@ -137,7 +138,8 @@ export function DashboardNav() {
             const Icon = item.icon;
             return (
               <Link key={item.key} href={navHref(item.key)}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive ? "bg-navy-900 text-white" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}>
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${isActive ? "bg-navy-900 text-white" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}
+                {...(isActive ? { "aria-current": "page" as const } : {})}>
                 <Icon className="h-4 w-4 shrink-0" />
                 <span>{item.label}</span>
               </Link>

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Gauge } from "lucide-react";
 
 export default async function PMFPage({
@@ -35,7 +36,8 @@ export default async function PMFPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-navy-900">PMF Readiness Lite</h1>
+        <Breadcrumbs items={[{ label: "PMF Readiness" }]} />
+          <h1 className="text-2xl font-bold text-navy-900">PMF Readiness Lite</h1>
         <p className="text-sm text-gray-500">An objective, explainable signal of whether you have enough validated evidence to scale.</p>
       </div>
 

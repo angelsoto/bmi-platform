@@ -45,10 +45,13 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <DashboardNav />
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader user={session.user} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6">{children}</main>
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-6" tabIndex={-1}>
+          {children}
+        </main>
       </div>
     </div>
   );
