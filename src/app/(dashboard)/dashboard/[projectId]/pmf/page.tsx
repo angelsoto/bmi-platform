@@ -126,7 +126,7 @@ export default async function PMFPage({
                 <p className="text-xs text-red-600 mb-2">
                   These hypotheses are holding your PMF score down:
                 </p>
-                <HypothesisList ids={ids} />
+                <HypothesisList ids={ids} projectId={projectId} />
               </div>
             );
           })()}
@@ -136,7 +136,7 @@ export default async function PMFPage({
   );
 }
 
-async function HypothesisList({ ids }: { ids: string[] }) {
+async function HypothesisList({ ids, projectId }: { ids: string[]; projectId: string }) {
   const hypotheses = await prisma.hypothesis.findMany({
     where: { id: { in: ids } },
     select: { id: true, title: true, evidenceStrength: true },
@@ -145,11 +145,14 @@ async function HypothesisList({ ids }: { ids: string[] }) {
   return (
     <ul className="space-y-1">
       {hypotheses.map((h) => (
-        <li key={h.id} className="flex items-center justify-between text-xs text-red-700">
-          <span>{h.title}</span>
-          <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium">
-            {h.evidenceStrength}
-          </span>
+        <li key={h.id}>
+          <Link href={`/dashboard/${projectId}/hypotheses/${h.id}`}
+            className="flex items-center justify-between rounded px-1 py-0.5 text-xs text-red-700 hover:bg-red-50 transition-colors">
+            <span className="underline decoration-red-200 hover:decoration-red-500">{h.title}</span>
+            <span className="shrink-0 rounded-full bg-red-100 px-2 py-0.5 font-medium">
+              {h.evidenceStrength}
+            </span>
+          </Link>
         </li>
       ))}
     </ul>
