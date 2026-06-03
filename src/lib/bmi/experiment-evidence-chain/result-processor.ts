@@ -107,8 +107,23 @@ export async function runExperimentResultChain(input: ChainInput): Promise<Chain
         evidenceItemId: evidenceItem.id,
         sourceEntityType: "experiment_result",
         sourceEntityId: result.id,
+        originalEvidenceStrength: evidenceItem.evidenceStrength,
         adjustedEvidenceStrength: review.adjustedEvidenceStrength,
         recommendedDisconfirmationTest: review.recommendedDisconfirmationTest,
+      },
+    });
+
+    
+    // Log AI call
+    await tx.aILog.create({
+      data: {
+        projectId: input.projectId,
+        userId: input.userId,
+        functionType: "experiment_result_chain",
+        inputSummary: evidenceText.substring(0, 200),
+        model: "mock",
+        outputEntityType: "evidence_quality_review",
+        outputEntityId: qualityReview.id,
       },
     });
 

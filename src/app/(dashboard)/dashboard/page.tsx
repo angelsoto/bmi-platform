@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { DataFreshness } from "@/components/ui/DataFreshness";
 import { prisma } from "@/lib/db/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -134,6 +135,7 @@ export default async function DashboardPage() {
                   <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400">
                     <span className="capitalize">Stage: {project.currentStage}</span>
                     {loopCount > 0 && <span>{loopCount} loop{loopCount !== 1 ? "s" : ""}</span>}
+                  <DataFreshness timestamp={project.updatedAt} label="" />
                   </div>
                 </Link>
               );

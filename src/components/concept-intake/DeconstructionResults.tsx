@@ -102,6 +102,9 @@ export function DeconstructionResults({ result, projectId, onReset }: Deconstruc
 
   return (
     <div className="space-y-6">
+      <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+        AI-generated suggestions require human review before they are saved.
+      </div>
       {/* AI Summary */}
       <div className="rounded-lg border bg-white p-4 shadow-widget">
         <h2 className="text-sm font-semibold text-navy-900">AI Summary</h2>

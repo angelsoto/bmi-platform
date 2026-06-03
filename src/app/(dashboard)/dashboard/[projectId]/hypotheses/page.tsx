@@ -54,7 +54,7 @@ export default async function HypothesesPage({
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-2">
         <Link href={`/dashboard/${projectId}/hypotheses`}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+          role="button" className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
             activeFilter === "all" ? "bg-navy-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}>All</Link>
         {TYPE_OPTIONS.map((t) => (
@@ -117,6 +117,11 @@ export default async function HypothesesPage({
                 <span>{h._count.evidence} evidence items</span>
                 <span>{h._count.experiments} experiments</span>
               </div>
+              {h.riskRanks[0]?.rationale && (
+                <p className="mt-2 text-xs text-indigo-600 italic border-t border-gray-100 pt-2">
+                  Why this matters: {h.riskRanks[0].rationale}
+                </p>
+              )}
             </Link>
           ))}
         </div>
