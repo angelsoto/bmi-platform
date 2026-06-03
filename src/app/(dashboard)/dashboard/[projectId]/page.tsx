@@ -47,6 +47,8 @@ export default async function ProjectDetailPage({
   return (
     <div className="space-y-6">
       <TourPopover projectId={projectId} />
+
+      {/* ── Section 1: Project Header ──────────────────────────── */}
       <div className="flex items-center justify-between" data-tour="project-header">
         <div>
           <h1 className="text-2xl font-bold text-navy-900">{project.name}</h1>
@@ -58,7 +60,28 @@ export default async function ProjectDetailPage({
         </div>
       </div>
 
+      {/* ── Section 2: KPI Stats (top — sets context) ──────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4" data-tour="validation-spine">
+        {[
+          { icon: Target, count: project._count.hypotheses, label: "Hypotheses", color: "text-navy-500" },
+          { icon: FlaskConical, count: project._count.experiments, label: "Experiments", color: "text-cyan-500" },
+          { icon: Shield, count: project._count.evidenceItems, label: "Evidence Items", color: "text-indigo-500" },
+          { icon: RefreshCw, count: project._count.learningLoops, label: "Learning Loops", color: "text-teal-500" },
+        ].map((s) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="rounded-md border bg-white p-3 text-center shadow-sm">
+              <Icon className={`mx-auto h-4 w-4 ${s.color} mb-1`} />
+              <div className="text-lg font-bold text-navy-900">{s.count}</div>
+              <div className="text-[10px] text-gray-400">{s.label}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Section 3: Hypotheses + Active Experiments (test-design surface) ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Riskiest Hypotheses — takes 2 cols */}
         <div className="md:col-span-2 rounded-lg border bg-white p-4 shadow-widget" data-tour="hypotheses">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -90,6 +113,75 @@ export default async function ProjectDetailPage({
           )}
         </div>
 
+        {/* Active Experiments — 1 col, moved up next to hypotheses */}
+        <Link href={`/dashboard/${projectId}/experiments`} data-tour="experiments"
+          className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="h-4 w-4 text-navy-700" />
+              <h2 className="text-sm font-semibold text-navy-900">Experiments</h2>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-navy-500" />
+          </div>
+          {activeExps.length > 0 ? (
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-navy-900">{activeExps.length}</span>
+                <span className="text-xs text-gray-500">active</span>
+              </div>
+              {activeExps.map((e) => (
+                <div key={e.id} className="flex items-center gap-2 text-xs">
+                  <span className="inline-block h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="text-gray-700">{e.name}</span>
+                  <StatusBadge status={e.status} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-1 py-4 text-sm text-gray-400">
+              <FlaskConical className="h-6 w-6 text-gray-200" />
+              <span>No active experiments</span>
+              <span className="text-xs">Total: {project._count.experiments}</span>
+            </div>
+          )}
+        </Link>
+      </div>
+
+      {/* ── Section 4: Evidence → PMF → Learning Loops (validation spine) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Evidence — first in the second row */}
+        <Link href={`/dashboard/${projectId}/evidence`} data-tour="evidence"
+          className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-navy-700" />
+              <h2 className="text-sm font-semibold text-navy-900">Evidence</h2>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-navy-500" />
+          </div>
+          {project._count.evidenceItems > 0 ? (
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-navy-900">{project._count.evidenceItems}</span>
+                <span className="text-xs text-gray-500">items</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Target className="h-3 w-3" />
+                <span>{project._count.hypotheses} hypotheses with evidence</span>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-indigo-600">
+                Review evidence <ArrowRight className="h-3 w-3" />
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-1 py-4 text-sm text-gray-400">
+              <Shield className="h-6 w-6 text-gray-200" />
+              <span>No evidence collected</span>
+            </div>
+          )}
+        </Link>
+
+        {/* PMF Readiness — second, derived from evidence */}
         <Link href={`/dashboard/${projectId}/pmf`} data-tour="pmf"
           className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
           <div className="flex items-center gap-2 mb-3">
@@ -125,72 +217,8 @@ export default async function ProjectDetailPage({
             </div>
           )}
         </Link>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link href={`/dashboard/${projectId}/experiments`} data-tour="experiments"
-          className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <FlaskConical className="h-4 w-4 text-navy-700" />
-              <h2 className="text-sm font-semibold text-navy-900">Experiments</h2>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-navy-500" />
-          </div>
-          {activeExps.length > 0 ? (
-            <div className="space-y-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-navy-900">{activeExps.length}</span>
-                <span className="text-xs text-gray-500">active</span>
-              </div>
-              {activeExps.map((e) => (
-                <div key={e.id} className="flex items-center gap-2 text-xs">
-                  <span className="inline-block h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
-                  <span className="text-gray-700">{e.name}</span>
-                  <StatusBadge status={e.status} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-1 py-4 text-sm text-gray-400">
-              <FlaskConical className="h-6 w-6 text-gray-200" />
-              <span>No active experiments</span>
-              <span className="text-xs">Total: {project._count.experiments}</span>
-            </div>
-          )}
-        </Link>
-
-        <Link href={`/dashboard/${projectId}/evidence`} data-tour="evidence"
-          className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-navy-700" />
-              <h2 className="text-sm font-semibold text-navy-900">Evidence</h2>
-            </div>
-            <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-navy-500" />
-          </div>
-          {project._count.evidenceItems > 0 ? (
-            <div className="space-y-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-navy-900">{project._count.evidenceItems}</span>
-                <span className="text-xs text-gray-500">items</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Target className="h-3 w-3" />
-                <span>{project._count.hypotheses} hypotheses with evidence</span>
-              </div>
-              <div className="flex items-center gap-1 text-xs text-indigo-600">
-                Review evidence <ArrowRight className="h-3 w-3" />
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-1 py-4 text-sm text-gray-400">
-              <Shield className="h-6 w-6 text-gray-200" />
-              <span>No evidence collected</span>
-            </div>
-          )}
-        </Link>
-
+        {/* Learning Loops — third in the row */}
         <Link href={`/dashboard/${projectId}/loops`} data-tour="loops"
           className="rounded-lg border bg-white p-4 shadow-widget hover:shadow-md hover:border-navy-300 transition-all group">
           <div className="flex items-center justify-between mb-3">
@@ -223,32 +251,7 @@ export default async function ProjectDetailPage({
         </Link>
       </div>
 
-      <div className="rounded-lg border bg-white p-5 shadow-widget" data-tour="quick-actions">
-        <h2 className="text-sm font-semibold text-navy-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Link href={`/dashboard/${projectId}/concept`}
-            className="flex items-center gap-3 rounded-md bg-navy-900 px-4 py-3 text-sm font-medium text-white hover:bg-navy-800 transition-colors">
-            <Lightbulb className="h-4 w-4 shrink-0 text-cyan-400" />
-            Concept Intake
-          </Link>
-          <Link href={`/dashboard/${projectId}/hypotheses`}
-            className="flex items-center gap-3 rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition-colors">
-            <Target className="h-4 w-4 shrink-0" />
-            Review Hypotheses
-          </Link>
-          <Link href={`/dashboard/${projectId}/experiments`}
-            className="flex items-center gap-3 rounded-md border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-medium text-cyan-700 hover:bg-cyan-100 transition-colors">
-            <FlaskConical className="h-4 w-4 shrink-0" />
-            View Experiments
-          </Link>
-          <Link href={`/dashboard/${projectId}/pmf`}
-            className="flex items-center gap-3 rounded-md border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-medium text-teal-700 hover:bg-teal-100 transition-colors">
-            <Gauge className="h-4 w-4 shrink-0" />
-            PMF Dashboard
-          </Link>
-        </div>
-      </div>
-
+      {/* ── Section 5: Deployed Surfaces (conditional) ─────────── */}
       {project._count.landingPages > 0 && (
         <div className="rounded-lg border bg-white p-4 shadow-widget" data-tour="surfaces">
           <div className="flex items-center justify-between mb-3">
@@ -275,7 +278,34 @@ export default async function ProjectDetailPage({
         </div>
       )}
 
-      {/* Onboarding suggestion when no hypotheses exist */}
+      {/* ── Section 6: Quick Actions (bottom — what to do next) ── */}
+      <div className="rounded-lg border bg-white p-5 shadow-widget" data-tour="quick-actions">
+        <h2 className="text-sm font-semibold text-navy-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Link href={`/dashboard/${projectId}/concept`}
+            className="flex items-center gap-3 rounded-md bg-navy-900 px-4 py-3 text-sm font-medium text-white hover:bg-navy-800 transition-colors">
+            <Lightbulb className="h-4 w-4 shrink-0 text-cyan-400" />
+            Concept Intake
+          </Link>
+          <Link href={`/dashboard/${projectId}/hypotheses`}
+            className="flex items-center gap-3 rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition-colors">
+            <Target className="h-4 w-4 shrink-0" />
+            Review Hypotheses
+          </Link>
+          <Link href={`/dashboard/${projectId}/experiments`}
+            className="flex items-center gap-3 rounded-md border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-medium text-cyan-700 hover:bg-cyan-100 transition-colors">
+            <FlaskConical className="h-4 w-4 shrink-0" />
+            View Experiments
+          </Link>
+          <Link href={`/dashboard/${projectId}/pmf`}
+            className="flex items-center gap-3 rounded-md border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-medium text-teal-700 hover:bg-teal-100 transition-colors">
+            <Gauge className="h-4 w-4 shrink-0" />
+            PMF Dashboard
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Section 7: Onboarding suggestion (bottom — only for new projects) ── */}
       {project._count.hypotheses === 0 && (
         <div className="rounded-lg border-2 border-dashed border-indigo-200 bg-indigo-50 p-5 text-center">
           <Lightbulb className="mx-auto mb-2 h-6 w-6 text-indigo-400" />
@@ -283,32 +313,12 @@ export default async function ProjectDetailPage({
           <p className="mt-1 text-sm text-indigo-600">
             Run a concept intake with your business idea to generate structured assumptions, hypotheses, and a draft persona and offer.
           </p>
-          <Link
-            href={`/dashboard/${projectId}/concept`}
-            className="mt-3 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
+          <Link href={`/dashboard/${projectId}/concept`}
+            className="mt-3 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
             <Lightbulb className="h-4 w-4" /> Start Concept Intake
           </Link>
         </div>
       )}
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4" data-tour="validation-spine">
-        {[
-          { icon: Target, count: project._count.hypotheses, label: "Hypotheses", color: "text-navy-500" },
-          { icon: FlaskConical, count: project._count.experiments, label: "Experiments", color: "text-cyan-500" },
-          { icon: Shield, count: project._count.evidenceItems, label: "Evidence Items", color: "text-indigo-500" },
-          { icon: RefreshCw, count: project._count.learningLoops, label: "Learning Loops", color: "text-teal-500" },
-        ].map((s) => {
-          const Icon = s.icon;
-          return (
-            <div key={s.label} className="rounded-md border bg-white p-3 text-center shadow-sm">
-              <Icon className={`mx-auto h-4 w-4 ${s.color} mb-1`} />
-              <div className="text-lg font-bold text-navy-900">{s.count}</div>
-              <div className="text-[10px] text-gray-400">{s.label}</div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
