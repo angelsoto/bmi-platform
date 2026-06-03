@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "version": "v1.2", "templateVersion": "1.0.0", "projectIndex": 2,
+    "description": "A scientific validation platform for wellness practitioners — early validation with weak evidence and bias flags",
+    "validationStage": "early_validation",
+    "generatedAt": "2026-06-02T12:00:00Z"
+  },
+  "project": {
+    "name": "GST Body",
+    "description": "A scientific validation platform for wellness practitioners to design, test, and launch evidence-based body composition programs.",
+    "businessType": "clinic", "currentStage": "validating", "proofCaseMode": true,
+    "primaryGoal": "Launch certification program with 10+ paying clinics in the first quarter",
+    "mvvStatement": {
+      "mission": "Make body composition science accessible to every wellness practitioner",
+      "vision": "A world where every fitness program is built on validated physiology, not trends",
+      "values": ["Scientific rigor", "Practitioner empathy", "Evidence over dogma"],
+      "founderAssumptions": ["Practitioners understand basic physiology", "Clinics will pay for validated protocols", "Science-based differentiation commands premium pricing"],
+      "unresolvedTensions": ["Depth vs accessibility of science content"],
+      "versionNumber": 2
+    },
+    "conceptIntake": "GST Body provides validated body composition protocols for wellness clinics. Most fitness programs are built on trends and bro-science rather than actual physiology research. GST Body bridges this gap by providing clinics with evidence-based protocols, assessment tools, and certification programs that differentiate them from unqualified trainers who undercut on price.",
+    "personas": [
+      { "id": "pers_01", "name": "Wellness Clinic Owner", "primaryPain": "Competing with unqualified trainers who undercut on price — needs a science-backed differentiator", "context": "Owns a clinic with 3-10 staff, sees clients 30+ sessions/week, wants to justify premium pricing", "relatedHypothesisIds": ["hyp_01", "hyp_03"] },
+      { "id": "pers_02", "name": "Certified Practitioner", "primaryPain": "Hit a ceiling with current certifications and wants to offer advanced body composition services without going back to school", "context": "Has personal training cert, 3-5 years experience, wants to specialize", "relatedHypothesisIds": ["hyp_02"] }
+    ],
+    "offers": [
+      { "id": "off_01", "name": "GST Body Certification Program", "valueProposition": "Turn your clinic into an evidence-based body composition authority with certified protocols, assessment tools, and marketing support", "format": "program", "priceModel": "tiered", "priceAmount": 2997, "relatedHypothesisIds": ["hyp_03"] }
+    ],
+    "hypotheses": [
+      { "id": "hyp_01", "title": "Clinics need science-backed programs to compete", "statement": "Wellness clinic owners believe that offering evidence-based protocols differentiates them from unqualified trainers and justifies premium pricing of $150+/session.", "type": "desirability", "confidence": "medium", "evidenceStrength": "weak", "status": "active", "riskRank": { "survivalCriticality": "critical", "uncertainty": "high", "validationPriorityScore": 100, "rationale": "Core value prop — if clinics don't value science differentiation, the premise fails" } },
+      { "id": "hyp_02", "title": "Practitioners can learn composition science", "statement": "Wellness practitioners without physiology backgrounds can understand and apply validated body composition protocols after a 40-hour training program.", "type": "feasibility", "confidence": "low", "evidenceStrength": "none", "status": "active", "riskRank": { "survivalCriticality": "high", "uncertainty": "high", "validationPriorityScore": 75, "rationale": "Delivery depends on practitioners actually applying the protocols" } },
+      { "id": "hyp_03", "title": "Clinics will pay $3k for certification", "statement": "Wellness clinic owners will invest $2,000-$4,000 in a certification program that differentiates their practice and enables premium pricing.", "type": "viability", "confidence": "medium", "evidenceStrength": "weak", "status": "testing", "riskRank": { "survivalCriticality": "critical", "uncertainty": "medium", "validationPriorityScore": 67, "rationale": "Revenue model depends on this price point being acceptable" } },
+      { "id": "hyp_04", "title": "Program completion improves client outcomes", "statement": "Clinics running GST Body programs see measurable improvements in client body composition metrics within 12 weeks compared to standard programming.", "type": "feasibility", "confidence": "low", "evidenceStrength": "none", "status": "draft", "riskRank": { "survivalCriticality": "medium", "uncertainty": "high", "validationPriorityScore": 50, "rationale": "Long-term value and retention depend on proven results" } },
+      { "id": "hyp_05", "title": "Premium pricing is sustainable long-term", "statement": "Clinics can maintain premium pricing ($150+/session) using evidence-based differentiation without losing clients to cheaper alternatives over 12+ months.", "type": "viability", "confidence": "low", "evidenceStrength": "none", "status": "draft", "riskRank": { "survivalCriticality": "medium", "uncertainty": "medium", "validationPriorityScore": 33, "rationale": "Unit economics depend on sustained pricing power" } }
+    ],
+    "evidenceItems": [
+      { "id": "ev_01", "sourceType": "interview", "summary": "3 of 5 clinic owners said science differentiation 'sounds interesting' in initial conversations — weak interest signal", "rawText": "I asked 5 clinic owners if they'd use science-based protocols. 3 said 'that sounds interesting' but none committed. One said 'I'd need to see the data first.' Another asked about pricing but didn't follow up.", "relatedHypothesisId": "hyp_01", "evidenceStrength": "weak", "collectedAt": "2026-05-28T14:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "weak", "biasFlags": [
+        { "type": "polite_praise", "severity": "medium", "explanation": "Only 3 of 5 said it 'sounds interesting' — this is polite praise, not purchase intent" },
+        { "type": "small_sample", "severity": "high", "explanation": "Only 5 interviews; statistically insignificant" },
+        { "type": "non_committal_interest", "severity": "medium", "explanation": "'Sounds interesting' is non-committal language indicating low commitment" }
+      ], "recommendedDisconfirmationTest": "Run a landing page test with a pre-order button to measure true willingness to pay over stated interest" } },
+      { "id": "ev_02", "sourceType": "interview", "summary": "One clinic owner 'loves the idea' of certification but didn't act on it", "rawText": "A clinic owner said they 'love the idea' of having a certification. They asked about pricing and timeline but didn't follow up when given details.", "relatedHypothesisId": "hyp_03", "evidenceStrength": "weak", "collectedAt": "2026-05-30T10:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "weak", "biasFlags": [
+        { "type": "polite_praise", "severity": "high", "explanation": "'Love the idea' is a classic polite praise signal — enthusiasm for the concept, not a purchase" },
+        { "type": "founder_interpretation", "severity": "medium", "explanation": "Founder is interpreting expressed interest as validation rather than capturing actual behavior" }
+      ], "recommendedDisconfirmationTest": "Create a fake-door test: see if clinics actually enter payment info for a deposit on the certification" } }
+    ],
+    "experiments": [],
+    "landingPages": [],
+    "learningLoops": [],
+    "pmfAssessment": {
+      "customerDisappointmentScore": null, "totalHighRiskHypotheses": 2, "unvalidatedHighRiskHypotheses": 2,
+      "evidenceDistortionCoefficient": 0.42,
+      "validationVelocity": 0,
+      "pmfScore": 0,
+      "readinessState": "not_ready",
+      "explanation": "Early validation stage. 2 evidence items collected, both flagged for significant bias. Evidence distortion coefficient is 0.42 — biased evidence is suppressing confidence. Need to run disconfirmation tests before proceeding.",
+      "blockingHypothesisIds": ["hyp_01", "hyp_03"]
+    }
+  }
+}

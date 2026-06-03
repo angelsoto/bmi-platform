@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bmi-platform-full-project-dump",
+  "title": "BMI Platform — Full Project Dump Schema",
+  "description": "Complete data model for a mature BMI Platform project. All entities and their relationships. Can be used to hydrate the application for testing, usability audits, and interface validation.",
+  "type": "object",
+
+  "definitions": {
+    "timestamp": { "type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}" },
+    "enum_riskLevel": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "enum_evidenceStrength": { "type": "string", "enum": ["weak", "moderate", "strong"] },
+    "enum_hypothesisEvidenceStrength": { "type": "string", "enum": ["none", "weak", "moderate", "strong"] },
+    "enum_confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+    "enum_severity": { "type": "string", "enum": ["low", "medium", "high"] },
+    "enum_hypothesisType": { "type": "string", "enum": ["desirability", "viability", "feasibility"] },
+    "enum_hypothesisStatus": { "type": "string", "enum": ["draft", "active", "testing", "supported", "weakened", "invalidated", "archived"] },
+    "enum_experimentStatus": { "type": "string", "enum": ["proposed", "designed", "ready", "running", "analyzing", "decision_made", "applied", "stopped"] },
+    "enum_businessType": { "type": "string", "enum": ["expert_service", "startup", "clinic", "coaching", "consulting", "education", "venture_studio_project", "university_project", "other"] },
+    "enum_projectStage": { "type": "string", "enum": ["idea", "validating", "selling", "scaling", "optimizing"] },
+    "enum_experimentType": { "type": "string", "enum": ["landing_page_test", "message_test", "cta_test", "quiz_test", "interview_test", "survey_test", "manual_validation"] },
+    "enum_lpJourneyStage": { "type": "string", "enum": ["awareness", "consideration", "conversion", "retention"] },
+    "enum_decisionRuleOutcome": { "type": "string", "enum": ["supports", "weakens", "inconclusive"] },
+    "enum_loopStatus": { "type": "string", "enum": ["open", "action_defined", "applied", "measuring", "closed"] },
+    "enum_readinessState": { "type": "string", "enum": ["not_ready", "emerging", "strong_signal", "scale_ready"] },
+
+    "mvvStatement": {
+      "type": "object",
+      "required": ["mission", "vision", "values", "founderAssumptions", "unresolvedTensions"],
+      "properties": {
+        "id": { "type": "string" },
+        "mission": { "type": "string", "description": "Core mission statement" },
+        "vision": { "type": "string", "description": "Long-term vision" },
+        "values": { "type": "array", "items": { "type": "string" }, "description": "Core values" },
+        "founderAssumptions": { "type": "array", "items": { "type": "string" }, "description": "Founder's key assumptions about the business" },
+        "unresolvedTensions": { "type": "array", "items": { "type": "string" }, "description": "Tensions or trade-offs" },
+        "versionNumber": { "type": "integer", "minimum": 1 },
+        "createdByUserId": { "type": "string" }
+      }
+    },
+
+    "persona": {
+      "type": "object",
+      "required": ["name", "primaryPain"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "description": "Persona label, e.g. 'Time-poor founder'" },
+        "description": { "type": "string" },
+        "primaryPain": { "type": "string", "description": "The core problem this persona faces" },
+        "context": { "type": "string", "description": "Situational notes" },
+        "relatedHypothesisIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "offer": {
+      "type": "object",
+      "required": ["name", "valueProposition", "format"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "valueProposition": { "type": "string" },
+        "format": { "type": "string", "enum": ["service", "product", "subscription", "program", "other"] },
+        "priceModel": { "type": "string", "enum": ["one_time", "recurring", "tiered", "free", "undecided"] },
+        "priceAmount": { "type": "number" },
+        "relatedHypothesisIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "hypothesis": {
+      "type": "object",
+      "required": ["title", "statement", "type", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "statement": { "type": "string", "description": "Falsifiable statement" },
+        "type": { "$ref": "#/definitions/enum_hypothesisType" },
+        "relatedPersonaId": { "type": "string" },
+        "relatedOfferId": { "type": "string" },
+        "confidence": { "$ref": "#/definitions/enum_confidence" },
+        "evidenceStrength": { "$ref": "#/definitions/enum_hypothesisEvidenceStrength" },
+        "status": { "$ref": "#/definitions/enum_hypothesisStatus" },
+        "currentVersionNumber": { "type": "integer" },
+        "riskRank": {
+          "type": "object",
+          "properties": {
+            "survivalCriticality": { "$ref": "#/definitions/enum_riskLevel" },
+            "uncertainty": { "type": "string", "enum": ["low", "medium", "high"] },
+            "validationPriorityScore": { "type": "number", "minimum": 0, "maximum": 100 },
+            "rationale": { "type": "string" }
+          }
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "versionNumber": { "type": "integer" },
+              "statement": { "type": "string" },
+              "confidence": { "$ref": "#/definitions/enum_confidence" },
+              "changedReason": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "evidenceItem": {
+      "type": "object",
+      "required": ["summary", "sourceType", "evidenceStrength"],
+      "properties": {
+        "id": { "type": "string" },
+        "sourceType": { "type": "string", "enum": ["interview", "survey", "analytics", "experiment_result", "manual_note", "sales_call", "customer_message"] },
+        "sourceEntityId": { "type": "string" },
+        "summary": { "type": "string" },
+        "rawText": { "type": "string" },
+        "relatedHypothesisId": { "type": "string" },
+        "evidenceStrength": { "$ref": "#/definitions/enum_evidenceStrength" },
+        "collectedAt": { "$ref": "#/definitions/timestamp" },
+        "qualityReview": {
+          "type": "object",
+          "properties": {
+            "adjustedEvidenceStrength": { "$ref": "#/definitions/enum_evidenceStrength" },
+            "biasFlags": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string", "enum": ["leading_question", "polite_praise", "non_committal_interest", "small_sample", "cherry_picked_signal", "founder_interpretation", "confirmation_bias", "sunk_cost_language", "vanity_metric"] },
+                  "severity": { "$ref": "#/definitions/enum_severity" },
+                  "explanation": { "type": "string" }
+                }
+              }
+            },
+            "recommendedDisconfirmationTest": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "experiment": {
+      "type": "object",
+      "required": ["name", "hypothesisId", "experimentType", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "experimentType": { "$ref": "#/definitions/enum_experimentType" },
+        "status": { "$ref": "#/definitions/enum_experimentStatus" },
+        "hypothesisId": { "type": "string" },
+        "startDate": { "$ref": "#/definitions/timestamp" },
+        "endDate": { "$ref": "#/definitions/timestamp" },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "targetValue": { "type": "number" },
+              "actualValue": { "type": "number" }
+            }
+          }
+        },
+        "decisionRule": {
+          "type": "object",
+          "properties": {
+            "metricName": { "type": "string" },
+            "operator": { "type": "string", "enum": ["gt", "gte", "lt", "lte", "eq", "between"] },
+            "threshold": { "type": "number" },
+            "outcomeIfMet": { "type": "string" },
+            "outcomeIfNotMet": { "type": "string" }
+          }
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "metricName": { "type": "string" },
+              "observedValue": { "type": "number" },
+              "threshold": { "type": "number" },
+              "metThreshold": { "type": "boolean" },
+              "decisionRuleOutcome": { "$ref": "#/definitions/enum_decisionRuleOutcome" },
+              "notes": { "type": "string" },
+              "generatedEvidenceItemId": { "type": "string" },
+              "generatedLearningLoopId": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "landingPage": {
+      "type": "object",
+      "required": ["name", "slug", "personaId", "offerId"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "personaId": { "type": "string" },
+        "offerId": { "type": "string" },
+        "hypothesisId": { "type": "string" },
+        "journeyStage": { "$ref": "#/definitions/enum_lpJourneyStage" },
+        "status": { "type": "string", "enum": ["draft", "review", "approved", "deployed", "measuring", "iterating", "archived"] },
+        "governanceStatus": { "type": "string", "enum": ["not_required", "pending", "approved", "blocked"] },
+        "ctas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "url": { "type": "string" },
+              "action": { "type": "string" },
+              "eventName": { "type": "string" }
+            }
+          }
+        },
+        "contentBlocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "blockType": { "type": "string", "enum": ["hero", "problem", "mechanism", "offer", "proof", "faq", "cta", "trust"] },
+              "content": { "type": "object" },
+              "orderIndex": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+
+    "learningLoop": {
+      "type": "object",
+      "required": ["outcomeSummary", "insight"],
+      "properties": {
+        "id": { "type": "string" },
+        "sourceEntityType": { "type": "string" },
+        "outcomeSummary": { "type": "string" },
+        "insight": { "type": "string" },
+        "actionTaken": { "type": "string" },
+        "measurementPlan": { "type": "string" },
+        "status": { "$ref": "#/definitions/enum_loopStatus" },
+        "closedAt": { "$ref": "#/definitions/timestamp" }
+      }
+    },
+
+    "pmfAssessment": {
+      "type": "object",
+      "properties": {
+        "customerDisappointmentScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "totalHighRiskHypotheses": { "type": "integer" },
+        "unvalidatedHighRiskHypotheses": { "type": "integer" },
+        "evidenceDistortionCoefficient": { "type": "number", "minimum": 0, "maximum": 1 },
+        "validationVelocity": { "type": "number" },
+        "pmfScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "readinessState": { "$ref": "#/definitions/enum_readinessState" },
+        "explanation": { "type": "string" },
+        "blockingHypothesisIds": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+
+  "type": "object",
+  "required": ["meta", "project"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["version", "templateVersion", "projectIndex", "description"],
+      "properties": {
+        "version": { "type": "string", "description": "BMI Platform spec version", "enum": ["v1.2"] },
+        "templateVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "projectIndex": { "type": "integer", "description": "1-5, identifies which demo project this is" },
+        "description": { "type": "string", "description": "One-line description of the project's validation stage" },
+        "validationStage": { "type": "string", "enum": ["just_started", "early_validation", "mid_validation", "advanced", "near_pmf"] },
+        "generatedAt": { "$ref": "#/definitions/timestamp" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": ["name", "description", "businessType", "currentStage", "primaryGoal"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "businessType": { "$ref": "#/definitions/enum_businessType" },
+        "currentStage": { "$ref": "#/definitions/enum_projectStage" },
+        "primaryGoal": { "type": "string" },
+        "mvvStatement": { "$ref": "#/definitions/mvvStatement" },
+        "conceptIntake": { "type": "string", "description": "Raw idea text that was entered" },
+        "personas": { "type": "array", "items": { "$ref": "#/definitions/persona" } },
+        "offers": { "type": "array", "items": { "$ref": "#/definitions/offer" } },
+        "hypotheses": { "type": "array", "items": { "$ref": "#/definitions/hypothesis" } },
+        "evidenceItems": { "type": "array", "items": { "$ref": "#/definitions/evidenceItem" } },
+        "experiments": { "type": "array", "items": { "$ref": "#/definitions/experiment" } },
+        "landingPages": { "type": "array", "items": { "$ref": "#/definitions/landingPage" } },
+        "learningLoops": { "type": "array", "items": { "$ref": "#/definitions/learningLoop" } },
+        "pmfAssessment": { "$ref": "#/definitions/pmfAssessment" },
+        "analyticsEvents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "eventName": { "type": "string" },
+              "eventType": { "type": "string" },
+              "landingPageId": { "type": "string" },
+              "occurredAt": { "$ref": "#/definitions/timestamp" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

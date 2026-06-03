@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "version": "v1.2", "templateVersion": "1.0.0", "projectIndex": 4,
+    "description": "A hyperlocal platform connecting home cooks with neighbors — near PMF with strong evidence, closed learning loops, and a deployed landing page",
+    "validationStage": "near_pmf",
+    "generatedAt": "2026-06-02T12:00:00Z"
+  },
+  "project": {
+    "name": "LocalEats",
+    "description": "A hyperlocal platform connecting home cooks with neighbors for authentic, home-cooked meals — think Uber Eats meets home cooking.",
+    "businessType": "startup", "currentStage": "selling",
+    "primaryGoal": "Expand pilot to 3 additional neighborhoods and prove unit economics at density",
+    "mvvStatement": {
+      "mission": "Make home-cooked food accessible to everyone", "vision": "Every neighborhood has a food community, not just restaurants",
+      "values": ["Food safety first", "Community trust", "Economic opportunity for cooks"],
+      "founderAssumptions": ["Home cooks want to monetize their skills", "Neighbors trust peer-to-peer food", "Local density drives profitability"],
+      "unresolvedTensions": ["Regulatory compliance across jurisdictions", "Insurance costs at scale"],
+      "versionNumber": 4
+    },
+    "conceptIntake": "LocalEats is a platform connecting home cooks with neighbors for fresh, authentic home-cooked meals. Urban professionals are tired of expensive, impersonal delivery food. Home cooks have spare kitchen capacity and want to earn extra income. Think Uber Eats meets home cooking.",
+    "personas": [
+      { "id": "pers_01", "name": "Urban Foodie Professional", "primaryPain": "Delivery apps are expensive, impersonal, and the food never tastes as good as home cooking — wants authentic meals from real people", "context": "Lives in dense urban area, orders delivery 3-5x/week, spends $200+/month on food delivery", "relatedHypothesisIds": ["hyp_01", "hyp_03"] },
+      { "id": "pers_02", "name": "Home Cook", "primaryPain": "Loves cooking but can't justify cooking elaborate meals just for one or two people — wants to monetize existing skills and get recognition", "context": "Enjoys cooking as a creative outlet, has extra kitchen capacity, wants $20-35/hr side income", "relatedHypothesisIds": ["hyp_02"] }
+    ],
+    "offers": [
+      { "id": "off_01", "name": "LocalEats Meal Subscription", "valueProposition": "Fresh, authentic home-cooked meals from your neighbors. 3 meals/week from rotating local cooks. No restaurant markup, no delivery fees.", "format": "subscription", "priceModel": "recurring", "priceAmount": 49, "relatedHypothesisIds": ["hyp_01", "hyp_03"] },
+      { "id": "off_02", "name": "LocalEats Cook Partner Program", "valueProposition": "Earn $25-35/hr cooking what you already love. Flexible schedule. Food safety training and insurance included.", "format": "program", "priceModel": "free", "priceAmount": 0, "relatedHypothesisIds": ["hyp_02"] }
+    ],
+    "hypotheses": [
+      { "id": "hyp_01", "title": "People want alternatives to delivery apps", "statement": "Urban professionals who order delivery 3+ times per week are dissatisfied with current options and actively seek more authentic, homemade alternatives.", "type": "desirability", "confidence": "high", "evidenceStrength": "strong", "status": "supported", "riskRank": { "survivalCriticality": "critical", "uncertainty": "low", "validationPriorityScore": 33, "rationale": "Validated through survey and landing page experiment" } },
+      { "id": "hyp_02", "title": "Home cooks will cook for neighbors", "statement": "Home cooks in urban areas are willing to cook extra portions for neighbors in exchange for $25-35/hr income, given clear safety guidelines and scheduling flexibility.", "type": "viability", "confidence": "high", "evidenceStrength": "strong", "status": "supported", "riskRank": { "survivalCriticality": "critical", "uncertainty": "low", "validationPriorityScore": 33, "rationale": "Validated through interview series — supply side works" } },
+      { "id": "hyp_03", "title": "Customers pay $49/week for meals", "statement": "Urban professionals will spend $49/week on 3-4 home-cooked meals delivered from neighbors — verified through pre-sale campaign.", "type": "viability", "confidence": "high", "evidenceStrength": "strong", "status": "supported", "riskRank": { "survivalCriticality": "high", "uncertainty": "low", "validationPriorityScore": 25, "rationale": "Validated through pre-sales with deposits" } },
+      { "id": "hyp_04", "title": "Food safety trust can be established", "statement": "Customers will trust home-cooked food from vetted neighbors when safety certifications, kitchen ratings, and satisfaction guarantees are in place.", "type": "feasibility", "confidence": "high", "evidenceStrength": "moderate", "status": "supported", "riskRank": { "survivalCriticality": "high", "uncertainty": "medium", "validationPriorityScore": 50, "rationale": "Pilot data shows trust signals work — regulatory path still forming" } },
+      { "id": "hyp_05", "title": "Unit economics support growth at density", "statement": "Platform achieves 30%+ gross margin after covering cook payouts (65%), insurance, and platform costs when neighborhood density reaches 50+ active customers per square mile.", "type": "viability", "confidence": "medium", "evidenceStrength": "moderate", "status": "testing", "riskRank": { "survivalCriticality": "medium", "uncertainty": "medium", "validationPriorityScore": 33, "rationale": "Pilot data shows 26% margin at current density, projected 38% at 3x density — needs validation" } }
+    ],
+    "evidenceItems": [
+      { "id": "ev_01", "sourceType": "survey", "summary": "Survey of 234 urban professionals: 71% said they'd try a home-cooked meal delivery service", "rawText": "Comprehensive survey across 5 cities. 234 respondents. 71% interested. 42% would order weekly. Top concerns: food safety (58%), variety (22%), price (15%).", "relatedHypothesisId": "hyp_01", "evidenceStrength": "strong", "collectedAt": "2026-05-13T12:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "strong", "biasFlags": [] } },
+      { "id": "ev_02", "sourceType": "experiment_result", "summary": "Landing page 8.3% email signup rate over 3 weeks (4,200 visitors) — exceeded 5% threshold", "rawText": "Facebook/Instagram campaign in Austin. 4,200 visitors, 349 signups (8.3%). Significantly exceeded 5% threshold. Strong demand signal.", "relatedHypothesisId": "hyp_01", "evidenceStrength": "strong", "collectedAt": "2026-05-19T09:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "strong", "biasFlags": [{ "type": "small_sample", "severity": "low", "explanation": "Single city test — may not generalize nationally" }], "recommendedDisconfirmationTest": "Run landing page in 2 additional cities to validate geographic generalizability" } },
+      { "id": "ev_03", "sourceType": "interview", "summary": "18 of 25 home cooks willing to cook for neighbors at $25-35/hr", "rawText": "Interviewed 25 home cooks in Austin. 18 willing to participate. Requirements: clear safety guidelines (14/18), minimum $25/hr payout (16/18), flexible schedule (all). Strong supply signal.", "relatedHypothesisId": "hyp_02", "evidenceStrength": "strong", "collectedAt": "2026-05-17T14:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "strong", "biasFlags": [{ "type": "small_sample", "severity": "low", "explanation": "Single city, 25 cooks — directional but consistent across demographics" }] } },
+      { "id": "ev_04", "sourceType": "experiment_result", "summary": "Pre-sale: 47 customers paid $49 deposit. 82% conversion from interested to paid.", "rawText": "210 waitlist → 172 interested → 47 paid (82% conversion from interested). Strong willingness-to-pay signal at $49/week.", "relatedHypothesisId": "hyp_03", "evidenceStrength": "strong", "collectedAt": "2026-05-23T10:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "strong", "biasFlags": [] } },
+      { "id": "ev_05", "sourceType": "manual_note", "summary": "Pilot delivery data: 91% satisfaction, 68% repeat order rate over 3 weeks", "rawText": "47 customers, 3-week pilot. 91% rated 4/5+. 68% reordered. Average order value: $14.50. Cooks earned avg $32/hr. Strong product-market signals.", "relatedHypothesisId": "hyp_04", "evidenceStrength": "moderate", "collectedAt": "2026-05-30T18:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "moderate", "biasFlags": [{ "type": "small_sample", "severity": "medium", "explanation": "Single neighborhood pilot, 3 weeks — not yet proven at scale" }] } },
+      { "id": "ev_06", "sourceType": "analytics", "summary": "Pilot unit economics: 26% gross margin, projected 38% at 3x density", "rawText": "Revenue \$2,303 (47 customers × \$49). Costs: cooks \$1,378 (60%), insurance \$185 (8%), platform fees \$142 (6%). Net margin: 26%. At 3x density: projected 38% margin from reduced delivery radius.", "relatedHypothesisId": "hyp_05", "evidenceStrength": "moderate", "collectedAt": "2026-05-31T15:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "moderate", "biasFlags": [{ "type": "cherry_picked_signal", "severity": "low", "explanation": "Single data point — projections from one pilot may be optimistic" }] } }
+    ],
+    "experiments": [
+      { "id": "exp_01", "name": "Landing Page Demand Validation", "description": "Facebook/Instagram campaign targeting foodies in Austin, TX", "experimentType": "landing_page_test", "status": "decision_made", "hypothesisId": "hyp_01", "startDate": "2026-05-12T09:00:00Z", "endDate": "2026-05-19T09:00:00Z", "results": [{ "metricName": "signup_rate", "observedValue": 0.083, "threshold": 0.05, "metThreshold": true, "decisionRuleOutcome": "supports", "notes": "4,200 visitors, 349 signups. Exceeded 5% threshold by 66%." }], "decisionRule": { "metricName": "signup_rate", "operator": "gte", "threshold": 0.05, "outcomeIfMet": "supports", "outcomeIfNotMet": "weakens" } },
+      { "id": "exp_02", "name": "Pre-Sale Pricing Validation", "description": "Pre-sale campaign with $49 deposit to validate willingness to pay", "experimentType": "landing_page_test", "status": "applied", "hypothesisId": "hyp_03", "startDate": "2026-05-16T09:00:00Z", "endDate": "2026-05-23T10:00:00Z", "results": [{ "metricName": "pre_sale_conversion", "observedValue": 0.82, "threshold": 0.5, "metThreshold": true, "decisionRuleOutcome": "supports" }], "decisionRule": { "metricName": "pre_sale_conversion", "operator": "gte", "threshold": 0.5, "outcomeIfMet": "supports", "outcomeIfNotMet": "weakens" } },
+      { "id": "exp_03", "name": "Neighborhood Density Pilot", "description": "Multi-neighborhood pilot to validate unit economics at scale", "experimentType": "landing_page_test", "status": "running", "hypothesisId": "hyp_05", "startDate": "2026-05-28T09:00:00Z" }
+    ],
+    "landingPages": [
+      { "id": "lp_01", "name": "LocalEats Austin", "slug": "localeats-austin", "personaId": "pers_01", "offerId": "off_01", "journeyStage": "conversion", "status": "measuring", "governanceStatus": "not_required", "seoTitle": "LocalEats — Home-Cooked Meals from Your Neighbors", "seoDescription": "Fresh, authentic home-cooked meals delivered from neighborhood kitchens", "ctas": [{ "label": "Join the Waitlist", "url": "/waitlist", "action": "click", "eventName": "waitlist_signup_austin" }], "contentBlocks": [
+        { "blockType": "hero", "content": { "headline": "Real Home Cooking, Right Next Door", "subheadline": "Fresh meals from your neighbors kitchens — delivered to yours" }, "orderIndex": 1 },
+        { "blockType": "problem", "content": { "text": "Tired of the same 5 delivery options? Expensive, impersonal, and never as good as home cooking." }, "orderIndex": 2 },
+        { "blockType": "offer", "content": { "text": "Weekly meal delivery from vetted home cooks in your neighborhood. $49/week for 3 meals." }, "orderIndex": 3 },
+        { "blockType": "proof", "content": { "text": "\"I haven't ordered takeout since joining LocalEats. The food is incredible.\" — Sarah, Austin", "testimonials": true }, "orderIndex": 4 },
+        { "blockType": "cta", "content": { "label": "Join the Waitlist" }, "orderIndex": 5 }
+      ] }
+    ],
+    "learningLoops": [
+      { "id": "loop_01", "sourceEntityType": "experiment", "outcomeSummary": "Pre-sale campaign: 47 paid deposits at $49/week. Waitlist conversion 82%.", "insight": "Customers will pay upfront for home-cooked meal delivery when they can see cook profiles and menus in advance. Pricing at $49/week is accepted.", "actionTaken": "Locked pricing at $49/week. Expanded pre-sale to 2 more neighborhoods.", "measurementPlan": "Track pre-sale conversion in new neighborhoods. Target: 70%+ conversion from interested to paid.", "status": "closed", "closedAt": "2026-05-27T16:00:00Z" },
+      { "id": "loop_02", "sourceEntityType": "experiment", "outcomeSummary": "Cook pilot validated: 18 cooks willing at $25-35/hr. Average earnings $32/hr in pilot.", "insight": "Cook supply is strong at $25+/hr. Safety guidelines are the primary concern, not pay rate. Cooks want flexibility in scheduling.", "actionTaken": "Designed safety certification process. Built flexible scheduling system.", "measurementPlan": "Track cook retention and satisfaction scores. Target 80%+ retention after 1 month.", "status": "closed", "closedAt": "2026-05-25T14:00:00Z" },
+      { "id": "loop_03", "sourceEntityType": "analytics_signal", "outcomeSummary": "Pilot gross margin at 26% is below target 30%. Density is the primary lever.", "insight": "26% gross margin is viable but not scalable. The unit economics improve significantly with neighborhood density (projected 38% at 3x). Need to focus marketing on dense areas exclusively.", "actionTaken": "Focused expansion on neighborhoods with 200+ households within 1 mile. Launched density analysis tool for site selection.", "measurementPlan": "Track margin per neighborhood cohort. Target 30% margin within 8 weeks of neighborhood launch.", "status": "action_defined" }
+    ],
+    "pmfAssessment": {
+      "customerDisappointmentScore": 0.65,
+      "totalHighRiskHypotheses": 4,
+      "unvalidatedHighRiskHypotheses": 0,
+      "evidenceDistortionCoefficient": 0.08,
+      "validationVelocity": 3.5,
+      "pmfScore": 0.68,
+      "readinessState": "strong_signal",
+      "explanation": "PMF score of 68% indicates Strong Signal. All 4 critical hypotheses are validated with moderate or strong evidence. Evidence distortion is low at 0.08 (only minor bias flags from single-city sampling). The remaining blocker is unit economics at scale (hyp_05), which is currently being tested through the multi-neighborhood density pilot. Recommend preparing for controlled scaling to additional neighborhoods once density pilot confirms margin projections.",
+      "blockingHypothesisIds": ["hyp_05"]
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "version": "v1.2", "templateVersion": "1.0.0", "projectIndex": 5,
+    "description": "A smart indoor gardening system for urban dwellers — mid-validation with a failed experiment and pivot in progress",
+    "validationStage": "mid_validation",
+    "generatedAt": "2026-06-02T12:00:00Z"
+  },
+  "project": {
+    "name": "PlantWise",
+    "description": "A smart indoor gardening system with AI-powered plant care, automated watering, and a subscription model for seeds and nutrients.",
+    "businessType": "startup", "currentStage": "validating",
+    "primaryGoal": "Pivot from hardware to subscription content model after failed hardware pre-sale",
+    "mvvStatement": {
+      "mission": "Make growing your own food effortless, even in a city apartment",
+      "vision": "Every home has a thriving edible garden, regardless of space or skill",
+      "values": ["Sustainability", "Food sovereignty", "Technology serving nature"],
+      "founderAssumptions": ["Urban dwellers want to grow their own food", "People will pay for automated gardening", "Hardware subscription model reduces adoption barrier"],
+      "unresolvedTensions": ["Hardware margins vs subscription revenue", "User retention after initial novelty"],
+      "versionNumber": 2
+    },
+    "conceptIntake": "PlantWise is a smart indoor gardening system for urban apartment dwellers who want to grow herbs, vegetables, and microgreens at home but lack the time, knowledge, or confidence to do it manually. The system includes an AI-powered sensor hub, automated watering, a companion app with plant care guidance, and a subscription for seeds and nutrients. Initial research showed strong interest but the hardware pre-sale failed — we're pivoting to a content + community subscription model.",
+    "personas": [
+      { "id": "pers_01", "name": "Urban Apartment Dweller (28-40)", "primaryPain": "Wants to grow herbs and vegetables at home but kills everything — needs a system that does the thinking for them", "context": "Lives in apartment with balcony or sunny window, shops at farmer's markets, values sustainability, tried growing plants before and failed", "relatedHypothesisIds": ["hyp_01", "hyp_03"] },
+      { "id": "pers_02", "name": "Health-Conscious Parent (35-50)", "primaryPain": "Worried about pesticides and food sourcing — wants to grow organic produce for the family without adding more complexity to a busy life", "context": "Has kids, cooks at home, concerned about food quality, has space for a small indoor garden setup", "relatedHypothesisIds": ["hyp_01", "hyp_04"] }
+    ],
+    "offers": [
+      { "id": "off_01", "name": "PlantWise Grow Kit (Hardware)", "valueProposition": "Complete indoor growing system with AI plant care, automated watering, and companion app — just add water and watch your food grow", "format": "product", "priceModel": "one_time", "priceAmount": 299, "relatedHypothesisIds": ["hyp_02"] },
+      { "id": "off_02", "name": "PlantWise Seed + Nutrient Subscription", "valueProposition": "Monthly curated seed packs, organic nutrients, and expert growing guides tailored to your space and skill level", "format": "subscription", "priceModel": "recurring", "priceAmount": 19, "relatedHypothesisIds": ["hyp_03", "hyp_04"] }
+    ],
+    "hypotheses": [
+      { "id": "hyp_01", "title": "Urban dwellers want to grow their own food", "statement": "Apartment dwellers in dense cities have tried or want to try growing herbs/vegetables at home but cite lack of knowledge, time, or confidence as the primary barrier.", "type": "desirability", "confidence": "high", "evidenceStrength": "moderate", "status": "supported", "riskRank": { "survivalCriticality": "critical", "uncertainty": "medium", "validationPriorityScore": 67, "rationale": "Survey and interviews confirm the desire exists — the question is willingness to pay" } },
+      { "id": "hyp_02", "title": "People will buy a $299 gardening system", "statement": "Urban dwellers interested in indoor gardening are willing to spend $200-350 on an automated growing system that removes the guesswork.", "type": "viability", "confidence": "low", "evidenceStrength": "weak", "status": "invalidated", "riskRank": { "survivalCriticality": "critical", "uncertainty": "high", "validationPriorityScore": 100, "rationale": "Original business model — pre-sale failed, hypothesis invalidated" } },
+      { "id": "hyp_03", "title": "People will pay $19/month for seeds + content", "statement": "Urban gardeners will subscribe to a $19/month service for curated seeds, nutrients, and expert guidance, even without buying the hardware kit.", "type": "viability", "confidence": "medium", "evidenceStrength": "weak", "status": "testing", "riskRank": { "survivalCriticality": "high", "uncertainty": "high", "validationPriorityScore": 75, "rationale": "Pivot hypothesis — content-first model avoids hardware risk" } },
+      { "id": "hyp_04", "title": "Content community drives retention", "statement": "Users who join a growing community with progress tracking, tips, and social features stay subscribed 3x longer than those using only the content feed.", "type": "feasibility", "confidence": "low", "evidenceStrength": "none", "status": "draft", "riskRank": { "survivalCriticality": "medium", "uncertainty": "high", "validationPriorityScore": 50, "rationale": "Retention depends on community — but this is unproven" } },
+      { "id": "hyp_05", "title": "Microgreens have fastest time-to-value", "statement": "First-time users who start with microgreens (7-14 day harvest cycle) are 2x more likely to continue growing than those who start with herbs (30-60 days).", "type": "feasibility", "confidence": "medium", "evidenceStrength": "moderate", "status": "testing", "riskRank": { "survivalCriticality": "medium", "uncertainty": "medium", "validationPriorityScore": 33, "rationale": "Quick wins drive habit formation — important for the new content model" } }
+    ],
+    "evidenceItems": [
+      { "id": "ev_01", "sourceType": "survey", "summary": "Survey of 180 urban dwellers: 64% have tried growing food at home; 78% of those failed or gave up", "rawText": "Survey via urban gardening Facebook groups and Nextdoor. 180 respondents across 4 cities. 64% had tried growing food. Of those, 78% stopped within 3 months due to: plant death (45%), pests (22%), time commitment (18%).", "relatedHypothesisId": "hyp_01", "evidenceStrength": "moderate", "collectedAt": "2026-05-14T10:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "moderate", "biasFlags": [{ "type": "small_sample", "severity": "medium", "explanation": "180 respondents from gardening groups — may over-represent people interested in plants" }] } },
+      { "id": "ev_02", "sourceType": "experiment_result", "summary": "Hardware pre-sale: only 23 pre-orders at $299 (target was 200). Hypothesis invalidated.", "rawText": "Pre-sale campaign ran for 4 weeks across Kickstarter, social media, and email. Total reach: 45,000. Visitors: 3,200. Pre-orders: 23 units. Conversion: 0.7%. Customer feedback: price too high, 'I'll wait for reviews,' 'What if I kill it again?'", "relatedHypothesisId": "hyp_02", "evidenceStrength": "weak", "collectedAt": "2026-05-20T12:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "weak", "biasFlags": [{ "type": "small_sample", "severity": "low", "explanation": "23 pre-orders is a clear signal, not a sampling issue — the hypothesis failed" }], "recommendedDisconfirmationTest": "Test a lower price point ($149-199) or content-only model to decouple hardware from value" } },
+      { "id": "ev_03", "sourceType": "interview", "summary": "12 follow-up interviews with pre-sale non-buyers: 8 said 'I'd pay for content and guidance alone'", "rawText": "Called 15 of the 3,177 visitors who didn't buy. 12 responded. 8 said they'd pay $10-20/month for expert growing content and a community. 4 wanted the hardware but at $149 or less. Key quote: 'I don't need another gadget, I need someone to teach me.'", "relatedHypothesisId": "hyp_03", "evidenceStrength": "weak", "collectedAt": "2026-05-22T14:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "weak", "biasFlags": [{ "type": "small_sample", "severity": "high", "explanation": "12 interviews is directional but not conclusive" }, { "type": "confirmation_bias", "severity": "medium", "explanation": "Founder may be hearing what they want to hear after the pivot" }], "recommendedDisconfirmationTest": "Create a landing page test for the content subscription at $19/month with no hardware required" } },
+      { "id": "ev_04", "sourceType": "manual_note", "summary": "Internal test: microgreens grow in 7-14 days with minimal setup; 90% success rate among 10 rookie testers", "rawText": "Asked 10 friends with no plant experience to grow microgreens using our guide and a basic kit. 9 of 10 succeeded on first try. Average harvest: day 11. Feedback: 'I can't believe I actually grew something' — strong emotional response.", "relatedHypothesisId": "hyp_05", "evidenceStrength": "moderate", "collectedAt": "2026-05-28T18:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "moderate", "biasFlags": [{ "type": "small_sample", "severity": "medium", "explanation": "10 testers is insufficient for statistical confidence" }] } }
+    ],
+    "experiments": [
+      { "id": "exp_01", "name": "Hardware Pre-Sale Campaign", "description": "Kickstarter + social media pre-sale for the $299 PlantWise Grow Kit", "experimentType": "landing_page_test", "status": "stopped", "hypothesisId": "hyp_02", "startDate": "2026-04-22T09:00:00Z", "endDate": "2026-05-20T12:00:00Z", "results": [{ "metricName": "pre_orders", "observedValue": 23, "threshold": 200, "metThreshold": false, "decisionRuleOutcome": "inconclusive", "notes": "23 pre-orders of 200 target — hypothesis invalidated at this price point" }], "decisionRule": { "metricName": "pre_orders", "operator": "gte", "threshold": 200, "outcomeIfMet": "supports", "outcomeIfNotMet": "weakens" } },
+      { "id": "exp_02", "name": "Content Subscription Landing Page", "description": "Landing page testing $19/month content subscription with no hardware required", "experimentType": "landing_page_test", "status": "designed", "hypothesisId": "hyp_03" }
+    ],
+    "landingPages": [],
+    "learningLoops": [
+      { "id": "loop_01", "sourceEntityType": "experiment", "outcomeSummary": "Hardware pre-sale failed: 23 orders against 200 target. Only 0.7% conversion.", "insight": "The hardware-first model doesn't work at $299. Customers want guidance and confidence, not another gadget. The pivot to content + subscription is supported by follow-up interviews.", "actionTaken": "Pivoted from hardware to content subscription model. Designed landing page for $19/month subscription. Reallocated hardware development budget to content creation.", "measurementPlan": "Run content subscription landing page test. Target 5%+ email signup at $19/month. If successful, build MVP content platform.", "status": "closed", "closedAt": "2026-05-25T16:00:00Z" }
+    ],
+    "pmfAssessment": {
+      "customerDisappointmentScore": null,
+      "totalHighRiskHypotheses": 2,
+      "unvalidatedHighRiskHypotheses": 2,
+      "evidenceDistortionCoefficient": 0.25,
+      "validationVelocity": 0,
+      "pmfScore": 0.06,
+      "readinessState": "not_ready",
+      "explanation": "This project is in a pivot phase. The original core hypothesis (hyp_02 — hardware at $299) was invalidated. The new pivot hypothesis (hyp_03 — content subscription) has only 12 interviews as evidence. PMF score is 6%. The project is still in very early validation for the new direction.",
+      "blockingHypothesisIds": ["hyp_03", "hyp_04"]
+    }
+  }
+}

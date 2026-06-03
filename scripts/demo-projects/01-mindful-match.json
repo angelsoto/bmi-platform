@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "version": "v1.2", "templateVersion": "1.0.0", "projectIndex": 1,
+    "description": "A meditation app connecting users with live guided sessions — just started",
+    "validationStage": "just_started",
+    "generatedAt": "2026-06-02T12:00:00Z"
+  },
+  "project": {
+    "name": "Mindful Match",
+    "description": "A meditation app that uses AI to match users with live guided sessions matching their mood and goals.",
+    "businessType": "startup", "currentStage": "idea",
+    "primaryGoal": "Validate that busy professionals will pay for live meditation sessions",
+    "mvvStatement": {
+      "mission": "Make personalized meditation accessible to everyone, anywhere",
+      "vision": "A world where mental wellness is as routine as physical fitness",
+      "values": ["Authenticity", "Accessibility", "Scientific rigor", "Human connection"],
+      "founderAssumptions": ["Users find existing meditation apps too generic", "Live instructors create accountability", "AI mood matching improves outcomes"],
+      "unresolvedTensions": ["Live vs recorded content economics", "Instructor quality at scale"],
+      "versionNumber": 1
+    },
+    "conceptIntake": "I want to build a meditation app that uses AI to match users with live guided sessions based on their current mood, stress level, and goals. Unlike Calm and Headspace which offer pre-recorded content, Mindful Match connects users with live instructors in real-time, creating accountability and personalization. Target users are busy professionals aged 25-45 who feel generic meditation apps don't stick. Revenue model: $14.99/month subscription.",
+    "personas": [
+      { "id": "pers_01", "name": "Busy Professional (30-45)", "primaryPain": "Generic meditation apps feel impersonal and lack accountability — no one notices when you skip a session", "context": "Works 50+ hr/week, high stress, tried Headspace/Calm but didn't maintain habit" },
+      { "id": "pers_02", "name": "Wellness Seeker (25-35)", "primaryPain": "Wants meditation to address specific needs (anxiety, focus, sleep) but doesn't know which format works best", "context": "Active on wellness social media, willing to spend on premium experiences" }
+    ],
+    "offers": [
+      { "id": "off_01", "name": "Mindful Match Premium", "valueProposition": "Live, AI-matched meditation sessions with real instructors tailored to your current state — never a generic session again", "format": "subscription", "priceModel": "recurring", "priceAmount": 14.99, "relatedHypothesisIds": ["hyp_01", "hyp_03"] },
+      { "id": "off_02", "name": "Corporate Wellness Program", "valueProposition": "Employee meditation benefits with live group sessions, progress tracking, and stress analytics for HR teams", "format": "program", "priceModel": "tiered", "priceAmount": 499.00, "relatedHypothesisIds": ["hyp_05"] }
+    ],
+    "hypotheses": [
+      { "id": "hyp_01", "title": "Users feel current meditation apps are too generic", "statement": "Busy professionals who have tried Calm or Headspace report that pre-recorded content lacks the personalization needed to maintain a daily habit beyond 2 weeks.", "type": "desirability", "confidence": "medium", "evidenceStrength": "none", "status": "active", "riskRank": { "survivalCriticality": "critical", "uncertainty": "high", "validationPriorityScore": 100, "rationale": "Core value proposition — if users are satisfied with existing apps, there is no reason to switch" } },
+      { "id": "hyp_02", "title": "Live instructors improve retention vs recorded", "statement": "Users who meditate with a live instructor at least twice per week maintain the habit 3x longer than users who use only pre-recorded content.", "type": "feasibility", "confidence": "low", "evidenceStrength": "none", "status": "active", "riskRank": { "survivalCriticality": "high", "uncertainty": "high", "validationPriorityScore": 75, "rationale": "The entire business model depends on live instruction being measurably better" } },
+      { "id": "hyp_03", "title": "Professionals will pay $14.99/month", "statement": "Target users currently spend at least $10/month on wellness apps and will pay $14.99 for live-session personalization.", "type": "viability", "confidence": "medium", "evidenceStrength": "none", "status": "active", "riskRank": { "survivalCriticality": "critical", "uncertainty": "high", "validationPriorityScore": 100, "rationale": "Revenue depends entirely on this price point being acceptable" } },
+      { "id": "hyp_04", "title": "AI mood matching improves session outcomes", "statement": "Users who are matched to sessions via AI mood assessment report 40% higher satisfaction than random assignment.", "type": "feasibility", "confidence": "low", "evidenceStrength": "none", "status": "draft", "riskRank": { "survivalCriticality": "medium", "uncertainty": "high", "validationPriorityScore": 50, "rationale": "Technical moat depends on this being true" } },
+      { "id": "hyp_05", "title": "Companies will buy corporate wellness licenses", "statement": "HR departments at mid-size tech companies (200-1000 employees) have budget for wellness benefits and will allocate $500+/month for employee meditation access.", "type": "viability", "confidence": "low", "evidenceStrength": "none", "status": "draft", "riskRank": { "survivalCriticality": "medium", "uncertainty": "medium", "validationPriorityScore": 33, "rationale": "B2B revenue could significantly improve unit economics" } }
+    ],
+    "evidenceItems": [], "experiments": [], "landingPages": [], "learningLoops": [],
+    "pmfAssessment": {
+      "customerDisappointmentScore": null, "totalHighRiskHypotheses": 2, "unvalidatedHighRiskHypotheses": 2,
+      "evidenceDistortionCoefficient": 0, "validationVelocity": 0, "pmfScore": 0,
+      "readinessState": "not_ready",
+      "explanation": "No evidence collected yet. Start with a concept intake to generate assumptions, then run interviews to validate the core desirability hypothesis.",
+      "blockingHypothesisIds": ["hyp_01", "hyp_03"]
+    }
+  }
+}

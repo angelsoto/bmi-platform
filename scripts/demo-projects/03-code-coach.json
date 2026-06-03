@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "version": "v1.2", "templateVersion": "1.0.0", "projectIndex": 3,
+    "description": "An AI pair programming tutor for junior developers — mid-validation with running experiments and moderate evidence",
+    "validationStage": "mid_validation",
+    "generatedAt": "2026-06-02T12:00:00Z"
+  },
+  "project": {
+    "name": "Code Coach",
+    "description": "An AI-powered pair programming tutor that helps junior developers level up through real-time code review and interactive challenges.",
+    "businessType": "startup", "currentStage": "validating",
+    "primaryGoal": "Prove that junior developers will pay for AI mentorship and that the AI measurably improves skills",
+    "mvvStatement": {
+      "mission": "Eliminate the tutorial hell that traps junior developers",
+      "vision": "Every junior developer has access to a senior mentor 24/7",
+      "values": ["Learning by doing", "Psychological safety", "Real code, not toy problems"],
+      "founderAssumptions": ["Juniors want AI mentorship", "Companies will pay for team licenses", "AI review can replace basic code review"],
+      "unresolvedTensions": ["AI accuracy vs human mentorship quality", "Junior confidence dependency on AI"],
+      "versionNumber": 3
+    },
+    "conceptIntake": "Code Coach is an AI pair programming tutor. Junior developers finish bootcamps knowing syntax but unable to solve real-world problems. They feel imposter syndrome and need mentorship but senior devs don't have time. Code Coach fills the gap with AI that reviews code, suggests improvements, teaches patterns, and tracks skill progression in real-time.",
+    "personas": [
+      { "id": "pers_01", "name": "Junior Developer (0-2 years)", "primaryPain": "Stuck in tutorial hell — can complete guided projects but freezes on unstructured real-world problems", "context": "Bootcamp grad or self-taught, employed at startup/mid-size, 1:1 mentorship is rare or low-quality", "relatedHypothesisIds": ["hyp_01", "hyp_02"] },
+      { "id": "pers_02", "name": "Engineering Manager", "primaryPain": "Junior devs take 6+ months to become productive — needs to accelerate their ramp-up time without burning senior devs", "context": "Manages team of 5-15 devs, has budget for learning tools, values measurable skill progression", "relatedHypothesisIds": ["hyp_05"] }
+    ],
+    "offers": [
+      { "id": "off_01", "name": "Code Coach Pro", "valueProposition": "Real-time AI code review with contextual explanations, pattern teaching, and skill progression tracking — like having a senior dev watch every PR", "format": "subscription", "priceModel": "recurring", "priceAmount": 29, "relatedHypothesisIds": ["hyp_01", "hyp_02", "hyp_04"] },
+      { "id": "off_02", "name": "Code Coach Teams", "valueProposition": "Team dashboard, skill heatmaps, custom learning paths, and hiring pipeline integration for engineering orgs", "format": "subscription", "priceModel": "tiered", "priceAmount": 499, "relatedHypothesisIds": ["hyp_05"] }
+    ],
+    "hypotheses": [
+      { "id": "hyp_01", "title": "Juniors feel stuck after bootcamps", "statement": "Junior developers who completed bootcamps or self-study feel unable to solve unstructured real-world problems and actively seek tools that provide real-time guidance.", "type": "desirability", "confidence": "high", "evidenceStrength": "moderate", "status": "supported", "riskRank": { "survivalCriticality": "critical", "uncertainty": "medium", "validationPriorityScore": 67, "rationale": "Core pain — if wrong, solution has no market" } },
+      { "id": "hyp_02", "title": "Juniors will pay $29/month", "statement": "Junior developers are willing to spend $29/month for an AI coding mentor, comparable to their current spending on courses ($15-50/mo) and tools.", "type": "viability", "confidence": "medium", "evidenceStrength": "moderate", "status": "testing", "riskRank": { "survivalCriticality": "high", "uncertainty": "medium", "validationPriorityScore": 50, "rationale": "Revenue model assumption" } },
+      { "id": "hyp_03", "title": "Senior devs contribute patterns for passive income", "statement": "Senior developers are willing to contribute coding patterns and be used as teaching material in exchange for passive income ($5-20/mo per active user running their patterns).", "type": "viability", "confidence": "medium", "evidenceStrength": "weak", "status": "testing", "riskRank": { "survivalCriticality": "high", "uncertainty": "high", "validationPriorityScore": 75, "rationale": "Supply side — without senior patterns, AI coaching quality degrades" } },
+      { "id": "hyp_04", "title": "AI code review measurably improves skills", "statement": "Regular AI-powered code review sessions improve junior developers' ability to solve unstructured problems by 40% within 8 weeks, measured by pre/post assessment.", "type": "feasibility", "confidence": "medium", "evidenceStrength": "weak", "status": "active", "riskRank": { "survivalCriticality": "medium", "uncertainty": "high", "validationPriorityScore": 50, "rationale": "Retention and word-of-mouth depend on actual improvement" } },
+      { "id": "hyp_05", "title": "Companies buy team licenses", "statement": "Engineering managers at mid-size tech companies (50-500 devs) will purchase team licenses at $499/month for 10-seat teams to accelerate junior developer ramp-up.", "type": "viability", "confidence": "low", "evidenceStrength": "none", "status": "draft", "riskRank": { "survivalCriticality": "medium", "uncertainty": "medium", "validationPriorityScore": 33, "rationale": "Scale depends on B2B distribution channel" } }
+    ],
+    "evidenceItems": [
+      { "id": "ev_01", "sourceType": "survey", "summary": "Survey of 47 junior devs: 68% feel stuck often or always on real-world problems", "rawText": "Survey via r/learnprogramming and Dev.to. 47 respondents. 68% reported feeling stuck 'often' or 'always' when transitioning from tutorials to real projects. Top requested feature: real-time code review.", "relatedHypothesisId": "hyp_01", "evidenceStrength": "moderate", "collectedAt": "2026-05-21T16:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "moderate", "biasFlags": [{ "type": "small_sample", "severity": "medium", "explanation": "47 respondents is directional but not conclusive" }], "recommendedDisconfirmationTest": "Run a larger survey (n=200+) to confirm the pain point across demographics" } },
+      { "id": "ev_02", "sourceType": "interview", "summary": "12 junior dev interviews: 9 described imposter syndrome from the gap between learned and required skills", "rawText": "Conducted 12 semi-structured interviews with junior devs. 9/12 independently mentioned imposter syndrome from the gap between what they learned and what their job requires. 4 had sought paid mentorship.", "relatedHypothesisId": "hyp_01", "evidenceStrength": "moderate", "collectedAt": "2026-05-23T14:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "moderate", "biasFlags": [] } },
+      { "id": "ev_03", "sourceType": "experiment_result", "summary": "Landing page A/B test: 2.1% conversion at $29/month, 4.8% at $19/month", "rawText": "Two-week landing page test with 1,240 visitors. Variant A ($29/mo): 2.1% conversion (13/619). Variant B ($19/mo): 4.8% conversion (30/621). Insufficient conversions in Variant A to reach statistical significance.", "relatedHypothesisId": "hyp_02", "evidenceStrength": "weak", "collectedAt": "2026-05-27T09:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "weak", "biasFlags": [{ "type": "small_sample", "severity": "medium", "explanation": "Only 13 conversions in Variant A — not statistically significant" }], "recommendedDisconfirmationTest": "Run longer test to statistical significance (target 50 conversions per variant)" } },
+      { "id": "ev_04", "sourceType": "interview", "summary": "3 of 5 beta users reported feeling more confident writing code after 2 weeks", "rawText": "Early beta with 5 users. 3 reported feeling 'more confident' writing code after using the AI code review feature for 2 weeks. 2 did not notice improvement. Self-reported confidence is a weak signal.", "relatedHypothesisId": "hyp_04", "evidenceStrength": "weak", "collectedAt": "2026-05-29T11:00:00Z", "qualityReview": { "adjustedEvidenceStrength": "weak", "biasFlags": [
+        { "type": "small_sample", "severity": "high", "explanation": "5 beta users is insufficient to draw conclusions" },
+        { "type": "polite_praise", "severity": "medium", "explanation": "'Feeling more confident' may be placebo effect or courtesy bias" }
+      ], "recommendedDisconfirmationTest": "Design a controlled experiment measuring task completion time before/after AI code review" } }
+    ],
+    "experiments": [
+      { "id": "exp_01", "name": "Senior Dev Willingness Survey", "description": "Survey senior developers about willingness to contribute coding patterns for passive income", "experimentType": "survey_test", "status": "running", "hypothesisId": "hyp_03", "startDate": "2026-05-30T10:00:00Z" },
+      { "id": "exp_02", "name": "Price Point Landing Page Test (Extended)", "description": "Extended A/B test at $19 vs $29/month to reach statistical significance (target 50 conversions per variant)", "experimentType": "landing_page_test", "status": "running", "hypothesisId": "hyp_02", "startDate": "2026-05-31T09:00:00Z", "metrics": [{ "name": "conversion_rate", "targetValue": 0.05, "actualValue": null }], "decisionRule": { "metricName": "conversion_rate", "operator": "gte", "threshold": 0.05, "outcomeIfMet": "supports", "outcomeIfNotMet": "weakens" } }
+    ],
+    "landingPages": [
+      { "id": "lp_01", "name": "Code Coach — Early Access", "slug": "code-coach-early", "personaId": "pers_01", "offerId": "off_01", "journeyStage": "conversion", "status": "measuring", "governanceStatus": "not_required", "ctas": [{ "label": "Get Early Access", "url": "/waitlist", "action": "click", "eventName": "early_access_click" }], "contentBlocks": [
+        { "blockType": "hero", "content": { "headline": "Stop Feeling Stuck. Code With Confidence.", "subheadline": "AI code review that teaches, not just corrects" }, "orderIndex": 1 },
+        { "blockType": "problem", "content": { "text": "You finished the bootcamp but real-world code still feels impossible. Your senior dev is too busy to review every PR." }, "orderIndex": 2 },
+        { "blockType": "offer", "content": { "text": "Real-time AI code review with explanations, pattern teaching, and skill tracking. $29/month." }, "orderIndex": 3 },
+        { "blockType": "cta", "content": { "label": "Join the Waitlist" }, "orderIndex": 4 }
+      ] }
+    ],
+    "learningLoops": [
+      { "id": "loop_01", "sourceEntityType": "experiment", "outcomeSummary": "Landing page test showed weak demand at $29 (2.1%) but stronger at $19 (4.8%)", "insight": "Price sensitivity is significant — a 34% price drop nearly doubles conversion. Need to optimize pricing or increase perceived value before scaling.", "actionTaken": "Designing a pricing page that emphasizes ROI (save \$500+/month on courses)", "measurementPlan": "Test with value-prop variant comparing 'cost of a coffee' vs 'cost of a course' framing", "status": "open" }
+    ],
+    "pmfAssessment": {
+      "customerDisappointmentScore": null, "totalHighRiskHypotheses": 2, "unvalidatedHighRiskHypotheses": 1,
+      "evidenceDistortionCoefficient": 0.17,
+      "validationVelocity": 0.5,
+      "pmfScore": 0.12,
+      "readinessState": "not_ready",
+      "explanation": "Core desirability hypothesis (hyp_01) has moderate evidence. Revenue hypothesis (hyp_02) has weak evidence suggesting $29 may be too high. Need to validate pricing before scaling. Combined PMF score is 12%.",
+      "blockingHypothesisIds": ["hyp_02", "hyp_03"]
+    }
+  }
+}
