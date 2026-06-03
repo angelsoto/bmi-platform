@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
-  Lightbulb, Target, FlaskConical, Globe, Gauge, Shield, RefreshCw, ArrowRight, ChevronRight
+  Lightbulb, Target, FlaskConical, Globe, Gauge, Shield, RefreshCw, Users, ArrowRight, ChevronRight
 } from "lucide-react";
 import { TourPopover } from "@/components/onboarding-tour/TourPopover";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -20,7 +20,7 @@ export default async function ProjectDetailPage({
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
-      _count: { select: { hypotheses: true, experiments: true, evidenceItems: true, learningLoops: true, landingPages: true } },
+      _count: { select: { hypotheses: true, experiments: true, evidenceItems: true, learningLoops: true, landingPages: true, personas: true, offers: true } },
       hypotheses: { include: { riskRanks: true }, orderBy: { updatedAt: "desc" }, take: 3 },
       experiments: { orderBy: { updatedAt: "desc" }, take: 3 },
       landingPages: { where: { status: { in: ["measuring", "deployed", "live"] } }, take: 3 },
@@ -60,20 +60,28 @@ export default async function ProjectDetailPage({
         </div>
       </div>
 
-      {/* ── Section 2: KPI Stats (top — sets context) ──────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4" data-tour="validation-spine">
+      {/* ── Section 2: Validation Progress ──────────────────────── */}
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3" data-tour="validation-spine">
         {[
           { icon: Target, count: project._count.hypotheses, label: "Hypotheses", color: "text-navy-500" },
+          { icon: Users, count: project._count.personas, label: "Personas", color: "text-violet-500" },
           { icon: FlaskConical, count: project._count.experiments, label: "Experiments", color: "text-cyan-500" },
-          { icon: Shield, count: project._count.evidenceItems, label: "Evidence Items", color: "text-indigo-500" },
-          { icon: RefreshCw, count: project._count.learningLoops, label: "Learning Loops", color: "text-teal-500" },
+          { icon: Shield, count: project._count.evidenceItems, label: "Evidence", color: "text-indigo-500" },
+          { icon: Gauge, count: pmf?.pmfScore ? 1 : 0, label: "PMF", color: "text-teal-500" },
+          { icon: RefreshCw, count: project._count.learningLoops, label: "Loops", color: "text-teal-500" },
         ].map((s) => {
           const Icon = s.icon;
+          const filled = s.count > 0;
+          const val = s.label === "PMF" ? (pmf?.pmfScore ? Math.round(pmf.pmfScore * 100) + "%" : "—") : s.count;
           return (
-            <div key={s.label} className="rounded-md border bg-white p-3 text-center shadow-sm">
-              <Icon className={`mx-auto h-4 w-4 ${s.color} mb-1`} />
-              <div className="text-lg font-bold text-navy-900">{s.count}</div>
-              <div className="text-[10px] text-gray-400">{s.label}</div>
+            <div key={s.label} className="rounded-md border bg-white p-2.5 text-center shadow-sm">
+              <Icon className={`mx-auto h-3.5 w-3.5 ${filled ? s.color : "text-gray-300"} mb-1`} />
+              <div className={`text-sm font-bold ${filled ? "text-navy-900" : "text-gray-300"}`}>{val}</div>
+              <div className="text-[9px] text-gray-400 truncate">{s.label === "PMF" ? "Readiness" : s.label}</div>
+              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-gray-100">
+                <div className={`h-full rounded-full ${filled ? "bg-navy-500" : "bg-gray-200"}`}
+                  style={{ width: s.label === "PMF" ? (pmf?.pmfScore ? pmf.pmfScore * 100 + "%" : "0%") : filled ? "100%" : "0%" }} />
+              </div>
             </div>
           );
         })}
