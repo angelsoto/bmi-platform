@@ -31,9 +31,10 @@ export function TourPopover({ projectId }: TourPopoverProps) {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userState, setUserState] = useState<UserState | null>(null);
-  const [position, setPosition] = useState({ top: 120, left: 0, arrowTop: 20 });
+  const [position, setPosition] = useState({ top: 120, left: 0, arrowTop: 20, arrowLeft: 16 });
   const [anchorRight, setAnchorRight] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
+  const repositioningRef = useRef(false);
 
   const patchState = useCallback(async (patch: Partial<UserState>) => {
     try {
@@ -70,76 +71,92 @@ export function TourPopover({ projectId }: TourPopoverProps) {
   }, []);
 
   const reposition = useCallback(() => {
+    // Guard against infinite scroll→reposition→scrollIntoView→scroll loop
+    if (repositioningRef.current) return;
+    repositioningRef.current = true;
+
     const isMobile = window.innerWidth < 768;
     const step = steps[currentIndex];
     const panelWidth = 380;
+    const panelHeight = 280;
     const gap = 16;
 
     if (isMobile) {
       setAnchorRight(false);
-      setPosition({ top: window.innerHeight - 280, left: 0, arrowTop: 0 });
+      setPosition({ top: window.innerHeight - panelHeight, left: 0, arrowTop: 0, arrowLeft: 0 });
+      repositioningRef.current = false;
       return;
     }
 
     if (!step?.targetSelector) {
-      setPosition({ top: 120, left: 16, arrowTop: 20 });
+      setPosition({ top: 120, left: 16, arrowTop: 20, arrowLeft: 16 });
       setAnchorRight(false);
+      repositioningRef.current = false;
       return;
     }
 
     const el = document.querySelector(step.targetSelector);
     if (!el) {
-      setPosition({ top: 120, left: 16, arrowTop: 20 });
+      setPosition({ top: 120, left: 16, arrowTop: 20, arrowLeft: 16 });
       setAnchorRight(false);
+      repositioningRef.current = false;
       return;
     }
 
-    // Scroll target into view before measuring
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Use instant scroll — smooth scroll races with getBoundingClientRect
+    el.scrollIntoView({ behavior: "instant", block: "center" });
 
-    // Measure after a brief settle for scroll
+    // Single rAF after instant scroll is sufficient
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const rect = el.getBoundingClientRect();
-        const elCenterY = rect.top + rect.height / 2;
-        const fitsRight = rect.right + panelWidth + gap < window.innerWidth;
-        const fitsBelow = rect.bottom + 280 < window.innerHeight;
-        const fitsAbove = rect.top - 280 > 0;
+      const rect = el.getBoundingClientRect();
+      const elCenterY = rect.top + rect.height / 2;
+      const targetCenterX = rect.left + rect.width / 2;
+      const fitsRight = rect.right + panelWidth + gap < window.innerWidth;
+      const fitsBelow = rect.bottom + panelHeight + gap < window.innerHeight;
+      const fitsAbove = rect.top - panelHeight - gap > 0;
 
-        let newTop: number;
-        let newLeft: number;
-        let newArrowTop: number;
-        let isRight: boolean;
+      let newTop: number;
+      let newLeft: number;
+      let newArrowTop: number;
+      let newArrowLeft: number;
+      let isRight: boolean;
 
-        if (fitsRight) {
-          // Place to the right — arrow points left toward target center
-          isRight = true;
-          newTop = Math.max(80, Math.min(elCenterY - 60, window.innerHeight - 320));
-          newLeft = rect.right + gap;
-          newArrowTop = Math.min(60, Math.max(20, elCenterY - newTop));
-        } else if (fitsBelow) {
-          // Place below — arrow points up toward target bottom
-          isRight = false;
-          newTop = rect.bottom + gap;
-          newLeft = Math.max(16, Math.min(rect.left, window.innerWidth - panelWidth - 16));
-          newArrowTop = 0; // at the top
-        } else if (fitsAbove) {
-          // Place above — arrow points down toward target top
-          isRight = false;
-          newTop = rect.top - 280;
-          newLeft = Math.max(16, Math.min(rect.left, window.innerWidth - panelWidth - 16));
-          newArrowTop = 260; // at the bottom of the panel
-        } else {
-          // Fallback: top-right corner
-          isRight = true;
-          newTop = 80;
-          newLeft = window.innerWidth - panelWidth - 16;
-          newArrowTop = 20;
-        }
+      if (fitsRight) {
+        // Place to the right — arrow points left toward target center
+        isRight = true;
+        newTop = Math.max(8, Math.min(elCenterY - 60, window.innerHeight - panelHeight - 8));
+        newLeft = rect.right + gap;
+        // Arrow tracks full panel height — no narrow clamp
+        newArrowTop = Math.max(8, Math.min(elCenterY - newTop, panelHeight - 8));
+        newArrowLeft = 0; // unused for side-anchor
+      } else if (fitsBelow) {
+        // Place below — arrow points up toward target center
+        isRight = false;
+        newTop = rect.bottom + gap;
+        newLeft = Math.max(16, Math.min(rect.left, window.innerWidth - panelWidth - 16));
+        newArrowTop = 0;
+        // Arrow horizontally aligned with target center
+        newArrowLeft = Math.max(12, Math.min(targetCenterX - newLeft, panelWidth - 12));
+      } else if (fitsAbove) {
+        // Place above — arrow points down toward target center
+        isRight = false;
+        newTop = rect.top - panelHeight - gap;
+        newLeft = Math.max(16, Math.min(rect.left, window.innerWidth - panelWidth - 16));
+        newArrowTop = panelHeight - 8;
+        // Arrow horizontally aligned with target center
+        newArrowLeft = Math.max(12, Math.min(targetCenterX - newLeft, panelWidth - 12));
+      } else {
+        // Fallback: top-right corner
+        isRight = true;
+        newTop = 80;
+        newLeft = window.innerWidth - panelWidth - 16;
+        newArrowTop = 20;
+        newArrowLeft = 0;
+      }
 
-        setAnchorRight(isRight);
-        setPosition({ top: newTop, left: newLeft, arrowTop: newArrowTop });
-      });
+      setAnchorRight(isRight);
+      setPosition({ top: newTop, left: newLeft, arrowTop: newArrowTop, arrowLeft: newArrowLeft });
+      repositioningRef.current = false;
     });
   }, [currentIndex, steps]);
 
@@ -170,6 +187,13 @@ export function TourPopover({ projectId }: TourPopoverProps) {
     setTimeout(reposition, 50);
   }, [patchState, reposition]);
 
+  // Escape key dismisses tour (§42.0 P1)
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape" && visible) skipTour(); };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [visible, skipTour]);
+
   if (loading) return null;
 
   if (!visible && userState?.hasSeenMainTour) {
@@ -196,13 +220,13 @@ export function TourPopover({ projectId }: TourPopoverProps) {
     completedIds.push(currentStep.key);
     await patchState({ currentTourStep: nextStep?.key || null, completedStepIds: JSON.stringify(completedIds) });
     setCurrentIndex(currentIndex + 1);
-    setTimeout(reposition, 100);
+    requestAnimationFrame(() => setTimeout(reposition, 0));
   };
 
   const handleBack = () => {
     if (currentIndex === 0) return;
     setCurrentIndex(currentIndex - 1);
-    setTimeout(reposition, 100);
+    requestAnimationFrame(() => setTimeout(reposition, 0));
   };
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
@@ -221,8 +245,11 @@ export function TourPopover({ projectId }: TourPopoverProps) {
           <div className="relative rounded-xl border-2 border-navy-900 bg-white p-5 shadow-xl">
             {/* Arrow pointing to target — dynamically positioned */}
             <div className={`absolute w-3 h-3 rotate-45 border-l border-t bg-white border-navy-900 ${
-              anchorRight ? "right-auto -left-[7px]" : "left-4"
-            }`} style={{ top: position.arrowTop }} />
+              anchorRight ? "right-auto -left-[7px]" : ""
+            }`} style={anchorRight
+              ? { top: position.arrowTop }
+              : { top: position.arrowTop, left: position.arrowLeft }
+            } />
             <TourContent step={currentStep} steps={steps} currentIndex={currentIndex} isLast={isLast}
               onBack={handleBack} onNext={handleNext} onSkip={skipTour} />
           </div>

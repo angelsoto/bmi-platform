@@ -24,9 +24,9 @@ export function ItemOverviewPopover({ trigger, title, fields }: ItemOverviewPopo
 
   return (
     <div ref={ref} className="relative inline-block">
-      <div onClick={() => setOpen(!open)} className="cursor-pointer">
+      <button onClick={() => setOpen(!open)} className="cursor-pointer" aria-expanded={open}>
         {trigger}
-      </div>
+      </button>
 
       {open && (
         <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-lg border border-gray-200 bg-white p-4 shadow-xl">

@@ -130,6 +130,11 @@ export function ConceptIntakeForm({ projectId, onComplete }: ConceptIntakeFormPr
         </div>
       </div>
 
+      {/* AI disclosure banner (§47.3) */}
+      <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+        AI-generated suggestions require human review. Demo mode — suggestions are templates, not real analysis. Configure an inference provider for production use.
+      </div>
+
       {/* Project state indicator */}
       <div className="flex items-center gap-2 text-xs text-gray-500">
         <span className={`flex items-center gap-1.5 rounded-full px-3 py-1 font-medium ${activeProjectId ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>

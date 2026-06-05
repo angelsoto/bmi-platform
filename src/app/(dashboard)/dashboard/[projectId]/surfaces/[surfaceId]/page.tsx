@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Globe, ArrowLeft, Save, Rocket, BarChart3 } from "lucide-react";
+import { Globe, ArrowLeft, Save, Rocket, BarChart3, Lock } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
@@ -52,6 +52,14 @@ export default function SurfaceDetailPage() {
     } catch (err: any) { setError(err.message); }
     finally { setSaving(false); }
   };
+
+  // Compute deploy blockers from page data (§38.7: governance pre-action visibility)
+  const deployBlockers: string[] = [];
+  if (!page?.personaId) deployBlockers.push("Linked persona required");
+  if (!page?.offerId) deployBlockers.push("Linked offer required");
+  if (!page?.primaryCTAId) deployBlockers.push("Primary CTA required");
+  if (page?.governanceStatus === "pending") deployBlockers.push("Owner governance approval required");
+  const canDeploy = deployBlockers.length === 0 && page?.status !== "deployed";
 
   const handleDeploy = async () => {
     try {
@@ -148,9 +156,24 @@ export default function SurfaceDetailPage() {
             <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}
           </button>
           {page?.status !== "deployed" && (
-            <button onClick={handleDeploy} className="flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
-              <Rocket className="h-4 w-4" /> Deploy
-            </button>
+            <div className="space-y-2">
+              {deployBlockers.length > 0 && (
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs">
+                  <div className="flex items-center gap-1.5 font-medium text-amber-800 mb-1">
+                    <Lock className="h-3.5 w-3.5" /> Deployment blocked
+                  </div>
+                  <ul className="list-disc list-inside space-y-0.5 text-amber-700">
+                    {deployBlockers.map((b) => <li key={b}>{b}</li>)}
+                  </ul>
+                </div>
+              )}
+              <button onClick={handleDeploy} disabled={!canDeploy}
+                className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white ${
+                  canDeploy ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
+                }`}>
+                <Rocket className="h-4 w-4" /> Deploy
+              </button>
+            </div>
           )}
         </div>
       </div>

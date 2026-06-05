@@ -166,6 +166,15 @@ body {
   animation: gauge-fill 0.8s ease-out forwards;
 }
 
+/* Mobile tour bottom sheet */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

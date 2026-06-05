@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireAuth } from "@/lib/auth/authorize";
+import type { ConceptDeconstructionOutput } from "@/lib/bmi/types";
 import { getAIProvider, getLastAIResult } from "@/lib/ai/client";
+import { getMockProvider } from "@/lib/ai/mock-provider";
 
 export async function POST(
   req: Request,
@@ -23,9 +25,14 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    // Call AI deconstruction
-    const ai = getAIProvider();
-    const output = await ai.deconstruct(intake.rawInput);
+    // Call AI deconstruction — non-blocking: falls back to mock on failure (§21.1A)
+    let output: ConceptDeconstructionOutput;
+    try {
+      const ai = getAIProvider();
+      output = await ai.deconstruct(intake.rawInput);
+    } catch {
+      output = await getMockProvider().deconstruct(intake.rawInput);
+    }
 
     // Store the output as parsedSummary, but DON'T create records yet
     // The user will select which items to accept via the accept endpoint

@@ -87,7 +87,7 @@ export function DashboardNav() {
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-navy-900 text-white text-xs font-bold">BMI</div>
           <span className="text-sm font-semibold text-navy-900">Platform</span>
         </Link>
-        <button onClick={() => setMobileOpen(false)} className="block md:hidden rounded-full p-1 text-gray-400 hover:text-gray-600">
+        <button onClick={() => setMobileOpen(false)} className="block md:hidden rounded-full p-1 text-gray-400 hover:text-gray-600" aria-label="Close navigation">
           <X className="h-5 w-5" />
         </button>
       </div>
@@ -180,7 +180,7 @@ export function DashboardNav() {
     <>
       {/* Mobile hamburger */}
       <button onClick={() => setMobileOpen(true)}
-        className="fixed top-3 left-3 z-40 flex md:hidden h-9 w-9 items-center justify-center rounded-md bg-navy-900 text-white shadow-lg">
+        className="fixed top-3 left-3 z-40 flex md:hidden h-9 w-9 items-center justify-center rounded-md bg-navy-900 text-white shadow-lg" aria-label="Open navigation">
         <Menu className="h-5 w-5" />
       </button>
 

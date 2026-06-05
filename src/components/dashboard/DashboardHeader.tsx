@@ -30,6 +30,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         <button
           onClick={() => signOut({ callbackUrl: "/auth/signin" })}
           className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="Sign out"
         >
           <LogOut className="h-4 w-4" />
         </button>

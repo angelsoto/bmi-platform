@@ -18,6 +18,7 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { getAIProvider, getLastAIResult } from "@/lib/ai/client";
+import { getMockProvider } from "@/lib/ai/mock-provider";
 import {
   computeEvidenceStrength,
   computePmfScore,
@@ -25,7 +26,7 @@ import {
   computeValidationCoverage,
   resolveReadinessState,
 } from "@/lib/bmi/formulas";
-import type { EvidenceStrength } from "@/lib/bmi/types";
+import type { EvidenceStrength, EvidenceQualityReviewOutput } from "@/lib/bmi/types";
 
 export interface ChainInput {
   experimentId: string;
@@ -50,7 +51,17 @@ export interface ChainOutput {
 }
 
 export async function runExperimentResultChain(input: ChainInput): Promise<ChainOutput> {
-  const ai = getAIProvider();
+  // Pre-compute evidence text outside the transaction
+  const evidenceText = `Experiment result: ${input.metricName}=${input.observedValue} (threshold: ${input.threshold}). Outcome: ${input.decisionRuleOutcome}.`;
+
+  // AI Quality Review — non-blocking: call BEFORE the transaction, fall back to mock on failure (§21.1A)
+  let review: EvidenceQualityReviewOutput;
+  try {
+    const ai = getAIProvider();
+    review = await ai.reviewEvidence(evidenceText);
+  } catch {
+    review = await getMockProvider().reviewEvidence(evidenceText);
+  }
 
   return prisma.$transaction(async (tx) => {
     // Step 1: Create ExperimentResult
@@ -75,7 +86,7 @@ export async function runExperimentResultChain(input: ChainInput): Promise<Chain
     });
 
     // Step 2: Auto-create EvidenceItem
-    const evidenceText = `Experiment result: ${input.metricName}=${input.observedValue} (threshold: ${input.threshold}). Outcome: ${input.decisionRuleOutcome}.`;
+    const evidenceTextInTx = evidenceText;
 
     const experiment = await tx.experiment.findUnique({
       where: { id: input.experimentId },
@@ -87,8 +98,8 @@ export async function runExperimentResultChain(input: ChainInput): Promise<Chain
         projectId: input.projectId,
         sourceType: "experiment_result",
         sourceEntityId: result.id,
-        summary: evidenceText,
-        rawText: input.notes || evidenceText,
+        summary: evidenceTextInTx,
+        rawText: input.notes || evidenceTextInTx,
         relatedHypothesisId: experiment?.hypothesisId,
         relatedExperimentId: input.experimentId,
         evidenceStrength: "weak", // will be updated after quality review
@@ -97,10 +108,7 @@ export async function runExperimentResultChain(input: ChainInput): Promise<Chain
       },
     });
 
-    // Step 3: AI Quality Review
-    const review = await ai.reviewEvidence(evidenceText);
-
-    // Persist quality review
+    // Step 3: Persist AI Quality Review (AI was called BEFORE the transaction)
     const qualityReview = await tx.evidenceQualityReview.create({
       data: {
         projectId: input.projectId,
